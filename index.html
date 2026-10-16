@@ -99,6 +99,10 @@ nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--soft);
 .ring .bg{stroke:var(--line)} .ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .25s linear}
 .ring .t{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-size:3.4rem;font-variant-numeric:tabular-nums}
 .cue{text-align:center;font-size:1.2rem;min-height:3.6em}
+.verse{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center;display:flex;flex-direction:column;gap:8px}
+.verse .dev{font-family:var(--font-deva);font-size:1.3rem;line-height:1.7;white-space:pre-line}
+.verse .rom{font-style:italic;color:var(--muted);font-size:.95rem;white-space:pre-line}
+.verse .mean{font-size:.98rem}
 .move{text-align:center;font-family:var(--font-display);font-size:1.45rem;font-weight:700;color:var(--accent);min-height:2.6em;display:grid;place-items:center;line-height:1.35}
 .alt{background:var(--soft);border-radius:14px;padding:12px 14px;font-size:1rem}
 .ctl{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:10px;margin-top:auto}
@@ -246,12 +250,67 @@ POSES.brahmari.flow=[['코로 4초 들이쉬세요',4],['허밍으로 8초 길�
   add('M','명상 · 트라타카와 소함','호흡 · 명상','좌법에서 응시, 만트라, 소리 관찰까지',
     [['om',60],['trataka',270],['sohum',420],['nada',240]],null);
 })();
+/* ===== 인도 전통 트랙 (시바난다 · 비하르 스쿨 · 하타요가 프라디피카) ===== */
+function sumF(a){return a.reduce(function(t,m){return t+m[1]},0)}
+var SN12=[];
+['오른발','왼발'].forEach(function(leg){
+  SN12=SN12.concat([
+    '① 프라나마사나 합장 · 날숨 · 옴 미트라야 나마하',
+    '② 하스타 웃타나사나 팔을 위로, 뒤로 · 들숨 · 옴 라바예 나마하',
+    '③ 파다하스타사나 앞으로 숙이기 · 날숨 · 옴 수리야야 나마하',
+    '④ 아슈와 산찰라나사나 '+leg+' 뒤로 · 들숨 · 옴 바나베 나마하',
+    '⑤ 파르바타사나 산 모양 · 숨 멈춤 · 옴 카가야 나마하',
+    '⑥ 아슈탕가 나마스카라 여덟 부위 닿기 · 날숨 · 옴 푸슈네 나마하',
+    '⑦ 부장가사나 코브라 · 들숨 · 옴 히란야가르바야 나마하',
+    '⑧ 파르바타사나 산 모양 · 날숨 · 옴 마리차예 나마하',
+    '⑨ 아슈와 산찰라나사나 '+leg+' 앞으로 · 들숨 · 옴 아디티야야 나마하',
+    '⑩ 파다하스타사나 · 날숨 · 옴 사비트레 나마하',
+    '⑪ 하스타 웃타나사나 · 들숨 · 옴 아르카야 나마하',
+    '⑫ 프라나마사나 · 날숨 · 옴 바스카라야 나마하'
+  ]);
+});
+var PAWAN=[['손가락을 쥐었다 펴세요',10],['손목을 좌우로 돌리세요',10],['손목을 접었다 펴세요',8],['팔꿈치를 접었다 펴세요',8],['어깨를 앞뒤로 크게 돌리세요',12],['목을 숙이고 들고, 좌우로 기울이세요',12],['목을 천천히 좌우로 돌리세요',10],['발가락을 펴고 접으세요',10],['발목을 좌우로 돌리세요',12],['발목을 앞뒤로 움직이세요',8],['무릎을 접었다 펴세요',10],['무릎을 돌리세요',12],['고관절을 크게 돌리세요',12],['나비 날개, 무릎을 위아래로 흔드세요',12],['몸통을 앞뒤 옆으로 부드럽게 굽히세요',12]];
+Object.assign(POSES,{
+  surya12:{ko:'수리야 나마스카라 12단계',sa:'Surya Namaskar (Sivananda)',cat:'빈야사',fx:'시바난다 계통의 전통 12단계 태양 경배. 단계마다 태양의 12 이름 만트라를 속으로 읊습니다. 오른발, 왼발 한 번씩이 한 라운드입니다.',cue:'동작마다 만트라를 속으로 읊으세요. 호흡 위치는 계보마다 조금씩 다릅니다.',alt:'런지에서 뒤 무릎을 내리고, 아슈탕가 나마스카라 대신 차투랑가를 무릎 내려서.',warn:'⑤번의 숨 멈춤은 부담되면 그냥 날숨으로 이어가세요.',flow:F(SN12,7)},
+  pawan:{ko:'관절 풀기 (파완묵타사나)',sa:'Pawanmuktasana / Sukshma Vyayama',cat:'준비',fx:'비하르 스쿨과 시바난다에서 아사나 전에 하는 관절 풀기 연속 동작. 손가락부터 발끝까지 순서대로.',cue:'호명하는 부위를 부드럽게. 천천히 호흡과 함께.',alt:'아픈 관절은 범위를 줄이세요.',warn:'',flow:PAWAN},
+  mantra1:{ko:'시작 만트라',sa:'Asato Ma Sad Gamaya',cat:'준비',fx:'수련 시작의 평화 기원. 브리하다란야카 우파니샤드 1.3.28에서 온 시구입니다.',cue:'합장하고 눈을 감고 호흡을 고른 뒤, 소리 내어 또는 속으로 세 번 읊으세요.',alt:'소리 내기 어려우면 속으로.',warn:'',
+    verse:{dev:'ॐ असतो मा सद्गमय ।\nतमसो मा ज्योतिर्गमय ।\nमृत्योर्मा अमृतं गमय ।\nॐ शान्तिः शान्तिः शान्तिः ॥',rom:'om asato mā sad gamaya\ntamaso mā jyotir gamaya\nmṛtyor mā amṛtaṁ gamaya\nom śāntiḥ śāntiḥ śāntiḥ',ko:'거짓에서 진실로, 어둠에서 빛으로, 죽음에서 불멸로 나를 이끄소서. 옴, 평화, 평화, 평화.'}},
+  mantra2:{ko:'마침 만트라',sa:'Sarve Bhavantu Sukhinah',cat:'휴식',fx:'수련을 마치며 모든 존재의 평안을 기원하는 시구입니다.',cue:'합장하고 고개를 숙여 세 번 읊으세요. 수련을 이웃에게 돌립니다.',alt:'속으로 읊어도 됩니다.',warn:'',
+    verse:{dev:'ॐ सर्वे भवन्तु सुखिनः ।\nसर्वे सन्तु निरामयाः ।\nसर्वे भद्राणि पश्यन्तु ।\nमा कश्चिद्दुःखभाग्भवेत् ॥\nॐ शान्तिः शान्तिः शान्तिः ॥',rom:'om sarve bhavantu sukhinaḥ\nsarve santu nirāmayāḥ\nsarve bhadrāṇi paśyantu\nmā kaścid duḥkha-bhāg bhavet\nom śāntiḥ śāntiḥ śāntiḥ',ko:'모든 존재가 행복하기를, 병이 없기를, 좋은 것을 보기를, 누구도 괴로움을 겪지 않기를. 옴, 평화, 평화, 평화.'}},
+  patanjali:{ko:'파탄잘리 예배',sa:'Patanjali Pranam',cat:'준비',fx:'요가 수트라의 저자 파탄잘리에게 올리는 예배 시구. 많은 요가 수업에서 시작에 읊습니다. 표기는 계보마다 조금씩 다릅니다.',cue:'합장하고 가슴 앞에 모은 채 세 번 읊으세요.',alt:'아사나 수련의 시작 만트라로 위 만트라를 대신 써도 됩니다.',warn:'',
+    verse:{dev:'योगेन चित्तस्य पदेन वाचां\nमलं शरीरस्य च वैद्यकेन ।\nयोऽपाकरोत्तं प्रवरं मुनीनां\nपतञ्जलिं प्राञ्जलिरानतोऽस्मि ॥',rom:'yogena cittasya padena vācāṁ\nmalaṁ śarīrasya ca vaidyakena\nyo ’pākarot taṁ pravaraṁ munīnāṁ\npatañjaliṁ prāñjalir ānato ’smi',ko:'요가로 마음을, 문법으로 말을, 의학으로 몸의 불순을 씻어 낸 성자 중 으뜸 파탄잘리께 합장하여 절합니다.'}},
+  siddha:{ko:'싯다사나',sa:'Siddhasana',cat:'앉은 자세',fx:'하타요가 프라디피카가 가장 먼저 꼽는 좌법입니다. 호흡과 명상을 위한 안정된 앉음.',cue:'한쪽 발뒤꿈치를 회음 가까이에 두고 다른 발을 그 위에 겹쳐요. 척추는 곧게, 시선은 미간 또는 눈을 감고.',alt:'아르다 싯다사나(발을 포개지 않고 앞에 두기)나 쿠션 위에 앉기.',warn:'무릎, 고관절에 무리가 가면 즉시 풀고 쿠션을 높이세요.',sides:true},
+  simha:{ko:'사자 자세',sa:'Simhasana',cat:'앉은 자세',fx:'하타요가 프라디피카에 나오는 좌법으로 얼굴과 목, 가슴의 긴장을 풀고 폐를 활짝 엽니다.',cue:'무릎을 꿇고 손을 무릎에 얹고, 입을 크게 벌려 혀를 내밀고 "하" 소리로 날숨을 터뜨려요. 3회 반복.',alt:'혀를 내밀기 어려우면 입만 크게 벌리고 소리만.',warn:'무릎이 불편하면 쿠션을 엉덩이 밑에.'},
+  mahamudra:{ko:'마하 무드라',sa:'Maha Mudra',cat:'무드라',fx:'하타요가 프라디피카의 3대 무드라 중 하나. 한쪽 다리를 펴고 앞으로 숙이며 호흡과 반다를 결합합니다. 양쪽 모두 해요.',cue:'한쪽 발뒤꿈치를 회음에 두고 반대 다리를 펴요. 들이쉬고, 잘란다라 반다로 턱을 당기고 발끝을 잡은 채 잠시 멈춘 뒤 내쉬세요. 중간에 반대쪽.',alt:'발끝 대신 정강이나 벨트를 잡으세요. 숨 멈춤은 생략하세요.',warn:'고혈압이나 허리가 불편하면 숨 멈춤 없이 가볍게만.',sides:true},
+  padahasta:{ko:'파다하스타사나',sa:'Padahastasana',cat:'전굴',fx:'시바난다 12자세의 서서 앞으로 굽히기. 손바닥을 발 아래에 넣어 척추 뒤쪽과 햄스트링을 늘립니다.',cue:'다리를 모으고 서서 상체를 숙이고 손을 발 아래에. 배를 허벅지에 붙이세요.',alt:'무릎을 굽히고 손을 정강이에.',warn:'허리가 불편하면 무릎을 많이 굽히세요.'},
+  suryabh:{ko:'수리야 베다나',sa:'Surya Bhedana',cat:'호흡',fx:'하타요가 프라디피카에 나오는 오른쪽 코 호흡. 몸의 열과 활력을 높입니다.',cue:'오른쪽 코로 들이쉬고, 양쪽을 막아 멈춘 뒤 왼쪽 코로 내쉬세요. 비율 1:2:2.',alt:'멈춤을 4초로 줄이세요.',warn:'고혈압, 불면, 더운 날은 피하거나 짧게. 어지러우면 중단.',
+    flow:[['오른쪽 코로 4초 들이쉬세요',4],['양쪽을 막고 8초 멈추세요',8],['왼쪽 코로 8초 내쉬세요',8]]},
+  sitkari:{ko:'시트카리',sa:'Sitkari',cat:'호흡',fx:'이를 맞물려 쉬쉬 소리로 들이쉬는 냉각 호흡. 시탈리와 짝을 이룹니다.',cue:'이를 가볍게 맞물려 입으로 들이쉬고 코로 내쉬세요.',alt:'치아가 시리면 시탈리로.',warn:'추운 날이나 저혈압에서는 짧게.',flow:[['이 사이로 4초 들이쉬세요',4],['입을 다물고 코로 6초 내쉬세요',6]]},
+  nadi142:{ko:'나디 소다나 1:4:2',sa:'Nadi Shodhana (advanced ratio)',cat:'호흡',fx:'1:4:2 비율은 전통적으로 알려진 숙련자용 비율입니다. 들숨 4, 멈춤 16, 날숨 8.',cue:'오른쪽 코를 막고 왼쪽으로 들이쉬고, 양쪽을 막아 멈춘 뒤 오른쪽으로 내쉬어요. 이어서 반대쪽. 멈춤 때 잘란다라와 물라 반다를 가볍게.',alt:'1:2:2 비율(아눌로마 빌로마)로 돌아가세요.',warn:'스승의 지도 아래서 천천히 늘려 가는 수련입니다. 고혈압, 심장 질환, 어지러움이 있으면 하지 마세요. 불편하면 즉시 평소 호흡.',
+    flow:[['왼쪽 코로 4초 들이쉬세요',4],['양쪽을 막고 16초 멈추세요',16],['오른쪽 코로 8초 내쉬세요',8],['오른쪽 코로 4초 들이쉬세요',4],['양쪽을 막고 16초 멈추세요',16],['왼쪽 코로 8초 내쉬세요',8]]},
+  japa:{ko:'자파 (만트라 염송)',sa:'Japa',cat:'명상',fx:'만트라를 반복해 읊는 명상. 전통적으로 108개 구슬의 말라를 씁니다.',cue:'선생님께 받은 만트라나 옴으로. 한 번 읊을 때마다 구슬을 하나씩 넘기세요.',alt:'말라가 없으면 손가락 마디로.',warn:'',flow:[['만트라를 한 번 읊고 구슬을 넘기세요',6]]}
+});
+POSES.om.flow=[['들이쉬세요',4],['아-우-음, 소리를 길게 내세요',12],['고요 속 울림을 느끼세요',4]];
+POSES.om.fx='수련 시작의 소리 의식. 호흡을 길게 하고 마음을 모읍니다.';
+POSES.om.cue='숨을 깊이 마시고 아-우-음을 길게 내세요. 소리는 배에서 가슴, 머리로 올라갑니다.';
+POSES.anuloma.cue='오른쪽 코를 막고 왼쪽으로 4초 들이쉬고, 8초 멈춘 뒤 오른쪽으로 8초 내쉬세요. 반대쪽도 같게. 시작하는 코는 계보마다 다릅니다.';
+(function(){
+  function add(id,name,grp,desc,steps,mood){SEQS.push({id:id,name:name,grp:grp,desc:desc,steps:steps,mood:mood})}
+  var pw=sumF(PAWAN);
+  add('S','시바난다 전통 클래스','인도 전통','시바난다 계통의 표준 구성: 만트라, 호흡, 수리야 12단계, 12 기본 자세, 이완, 염송',
+    [['mantra1',120],['kapala',120],['anuloma',240],['surya12',336],['sava',90],['sirsa',150],['balasana',45],['sarvanga',240],['hala',60],['matsya',60],['pasci',90],['bhujanga',45],['salabha',45],['dhanura',50],['ardha',90],['baka',45],['padahasta',60],['trikona',70],['sava',240],['japa',270],['mantra2',90]],null);
+  add('V','비하르 스쿨 · 관절 풀기와 니드라','인도 전통','파완묵타사나, 수리야 12단계, 소수 아사나, 호흡, 요가 니드라로 이어지는 구성',
+    [['mantra1',120],['pawan',pw],['surya12',336],['bhujanga',45],['setu',60],['pasci',60],['supta',60],['anuloma',180],['nidra1',90],['nidra2',105],['nidra3',105],['nidra4',80],['nidra5',162],['nidra6',60],['mantra2',90]],null);
+  add('Y','하타요가 프라디피카 호흡 수련','인도 전통','고전의 호흡 순서: 수리야 베다나, 우자이, 시트카리, 시탈리, 바스트리카, 브라마리, 무드라',
+    [['patanjali',90],['siddha',90],['om',90],['suryabh',180],['ujjayi',120],['sitkari',90],['sheetali',90],['bhastrika',130],['brahmari',120],['bandha',96],['mahamudra',120],['nada',240],['sava',120],['mantra2',90]],null);
+  add('Z','고전 좌법과 무드라','인도 전통','하타요가 프라디피카의 좌법, 마하 무드라, 비파리타 카라니, 나다 명상',
+    [['patanjali',90],['simha',60],['baddha',90],['siddha',120],['padma',120],['mahamudra',120],['viparita',120],['nada',240],['mantra2',90]],null);
+})();
 SEQS.forEach(function(s){s.total=s.steps.reduce(function(a,b){return a+b[1]},0)});
 var BREATHS = [
-  {id:'nadi',name:'나디 소다나',sa:'Nadi Shodhana',pat:[4,2,4,0],rounds:10,desc:'좌우 콧구멍을 번갈아 쉬는 정화 호흡. 마음이 어수선할 때.',how:'오른손 엄지로 오른쪽 코를 막고 왼쪽으로 들이쉬고, 약지로 왼쪽을 막고 오른쪽으로 내쉽니다. 다음엔 오른쪽으로 들이쉬고 왼쪽으로 내쉬는 것이 1회입니다.'},
+  {id:'nadi',name:'나디 소다나 (기초)',sa:'Nadi Shodhana',pat:[4,0,4,0],rounds:10,desc:'좌우 콧구멍을 번갈아 쉬는 정화 호흡. 멈춤 없이 1:1로 시작해 비율을 늘려 갑니다.',how:'비슈누 무드라로 오른손 엄지로 오른쪽 코, 약지로 왼쪽 코를 막습니다. 왼쪽으로 들이쉬고 오른쪽으로 내쉰 뒤 오른쪽으로 들이쉬고 왼쪽으로 내쉬는 것이 1회입니다. 시작하는 코는 계보마다 다릅니다.'},
   {id:'ujjayi',name:'우자이',sa:'Ujjayi',pat:[5,0,5,0],rounds:12,desc:'목 뒤를 살짝 좁혀 바다 소리를 내는 호흡. 수련 중 집중에.',how:'입을 다물고 코로 쉬며 목 안쪽에서 부드러운 파도 소리를 냅니다. 얼굴 힘은 빼세요.'},
   {id:'brah',name:'브라마리',sa:'Bhramari',pat:[4,0,8,0],rounds:8,desc:'허밍으로 내쉬는 벌 소리 호흡. 불안과 불면에.',how:'코로 들이쉬고, 입을 다문 채 "음~" 소리를 내며 길게 내쉽니다.'},
-  {id:'sleep',name:'4-7-8 수면 호흡',sa:'Relaxing breath',pat:[4,7,8,0],rounds:6,desc:'잠들기 전, 숨을 길게 내쉬며 몸을 가라앉힙니다.',how:'코로 4초 들이쉬고 7초 멈춘 뒤 입으로 8초 길게 내쉽니다. 어지러우면 멈춤을 줄이세요.'}
 ];
 var CARDS = [
   {t:'8지 요가',b:'파탄잘리의 요가 수트라가 말하는 여덟 단계: 야마(윤리), 니야마(수행 규칙), 아사나(자세), 프라나야마(호흡), 프라티야하라(감각 거두기), 다라나(집중), 디야나(명상), 사마디(합일). 우리가 매트에서 하는 건 이 중 세 번째와 네 번째입니다.'},
@@ -265,6 +324,14 @@ var CARDS = [
   {t:'사바사나',b:'송장 자세라는 뜻이지만 가장 어려운 자세라고 합니다. 가만히 있는 연습입니다. 최소 3분은 지키세요.'},
   {t:'우자이 호흡',b:'"승리의 호흡". 목 안쪽을 살짝 좁혀 코로 바다 소리를 냅니다. 호흡을 길고 일정하게 만들어 집중을 돕습니다.'},
   {t:'구나',b:'세상을 이루는 세 가지 성질. 사트바(고요), 라자스(활동), 타마스(무거움). 아침 수련은 라자스를, 저녁 수련은 사트바를 키우는 쪽으로 구성했습니다.'},
+  {t:'샤트카르마 여섯 정화법',b:'하타요가 프라디피카가 꼽는 정화법은 다우티, 바스티, 네티, 트라타카, 나울리, 카팔라바티입니다. 이 앱에는 트라타카와 카팔라바티만 넣었습니다. 나머지는 반드시 숙련된 스승의 직접 지도 아래서 배우세요.'},
+  {t:'게란다 삼히타의 7단계',b:'게란다 삼히타는 정화법, 아사나, 무드라, 프라티야하라, 프라나야마, 디야나, 사마디의 일곱 단계(삽타앙가 요가)를 말합니다. 파탄잘리의 8지와 구성이 다릅니다.'},
+  {t:'하타 프라디피카의 여덟 쿰바카',b:'수리야 베다나, 우자이, 시트카리, 시탈리, 바스트리카, 브라마리, 무르차, 플라비니. 이 앱의 하타요가 프라디피카 호흡 수련이 앞의 여섯을 따릅니다. 무르차와 플라비니는 지도자 없이는 권하지 않습니다.'},
+  {t:'시바난다 12 기본 자세',b:'머리서기, 어깨서기, 쟁기, 물고기, 앉아 앞으로 굽히기, 코브라, 메뚜기, 활, 반 척추 비틀기, 까마귀, 서서 앞으로 굽히기, 삼각 자세. 사이사이 사바사나로 쉬는 것이 시바난다 계통의 전형적인 수업 구성입니다.'},
+  {t:'비하르 스쿨과 요가 니드라',b:'스와미 사티아난다가 비하르(문게르)에서 체계화했습니다. 관절 풀기(파완묵타사나), 수리야 나마스카라, 요가 니드라로 이어지는 흐름이 대표적입니다.'},
+  {t:'카이발리야다마',b:'1924년 스와미 쿠발라야난다가 로나블라에 세운 요가 연구 기관입니다. 요가의 생리학적 연구와 교육으로 알려져 있습니다.'},
+  {t:'현대 요가의 두 갈래',b:'마이소르의 크리슈나마차리아에게서 파타비 조이스(아쉬탕가 빈야사)와 아헹가가 나왔습니다. 전통 문헌에는 없는 빈야사 흐름과 정렬 중심 접근이 여기서 시작됩니다.'},
+  {t:'구루-시슈야 전통',b:'요가는 문헌만으로 배우는 것이 아니라 스승에게서 제자로 전해진다고 봅니다. 숨 멈춤, 반다, 정화법은 특히 직접 지도가 필요합니다. 이 앱은 기억을 돕는 도구입니다.'},
   {t:'쿰바카 (숨 멈춤)',b:'들숨 후 멈춤은 안타라 쿰바카, 날숨 후 멈춤은 바히르 쿰바카입니다. 비율은 1:2:2에서 시작해 1:4:2로 천천히 늘리세요. 어지럽거나 불편하면 비율을 줄이는 것이 수련입니다.'},
   {t:'트리 반다',b:'물라 반다, 웃디야나 반다, 잘란다라 반다를 함께 쓰는 것을 마하 반다라 부릅니다. 날숨 끝에서만 연습하고, 식후나 고혈압이 있을 때는 피하세요.'},
   {t:'카운터 포즈 원칙',b:'강한 후굴 뒤에는 가벼운 전굴(아기 자세), 어깨서기 뒤에는 물고기 자세, 비틀기 뒤에는 중립 자세로 척추를 균형 있게 돌려놓습니다.'},
@@ -314,7 +381,7 @@ function recommended(){
   if(st.mood){return SEQS.filter(function(s){return s.mood===st.mood})[0]}
   return new Date().getHours()>=17 ? seqById('B') : seqById('D');
 }
-var GROUPS=['하타 정식','집중 수련','호흡 · 명상','회복 · 기본'];
+var GROUPS=['인도 전통','하타 정식','집중 수련','호흡 · 명상','회복 · 기본'];
 function timeOk(s){var m=s.total/60;return !st.time||(st.time===15&&m<=17)||(st.time===30&&m>17&&m<=35)||(st.time===45&&m>35)}
 function render(){
   var tabsEl=document.getElementById('tabs');
@@ -383,7 +450,7 @@ function vBreath(){
     '<button class="btn" data-act="bstart" id="bbtn">'+(B.run?'멈추기':'시작')+'</button>'+
     '<p class="note">'+esc(b.how)+'</p></section>'+
   '<section class="card"><h3>고급 호흡 · 명상</h3><p class="note">시간 단위로 안내가 이어지는 수련입니다. 시작하면 전체 화면 타이머가 열립니다.</p>'+
-  [['anuloma',240],['kapala',120],['bhastrika',130],['sheetali',90],['ujjayi',120],['bandha',96],['sohum',300],['trataka',270]].map(function(x){var p=POSES[x[0]];
+  [['anuloma',240],['nadi142',336],['suryabh',180],['sitkari',90],['kapala',120],['bhastrika',130],['sheetali',90],['ujjayi',120],['bandha',96],['mahamudra',120],['om',180],['japa',270],['sohum',300],['trataka',270]].map(function(x){var p=POSES[x[0]];
     return '<button class="seq" data-act="solo" data-v="'+x[0]+':'+x[1]+'"><span class="min">'+mins(x[1])+'</span><span class="grow"><b>'+esc(p.ko)+'</b><small>'+esc(p.fx)+'</small></span></button>'}).join('')+'</section>'+
   '<section class="card"><h3>명상 타이머</h3><p class="note">편하게 앉아 호흡만 느껴요. 끝나면 종소리가 납니다.</p><div class="row">'+
   [3,5,10].map(function(m){return '<button class="btn ghost small grow" data-act="med" data-v="'+m+'">'+m+'분</button>'}).join('')+'</div></section>'+
@@ -431,7 +498,7 @@ function startPlay(id){
 function enter(i){
   P.i=i;var step=P.seq.steps[i],p=POSES[step[0]];
   P.left=step[1];P.end=Date.now()+P.left*1000;P.half=false;P.showAlt=false;P.mv=-1;
-  if(!p.flow)say(p.ko+(store.detail?'. '+p.cue:''));
+  if(!p.flow)say(p.verse?p.ko:p.ko+(store.detail?'. '+p.cue:''));
   paint();
   if(p.flow)flowTick(p,step);
 }
@@ -481,6 +548,7 @@ function paint(){
   '<div class="prog"><i style="width:'+(P.i/n*100)+'%"></i></div>'+
   '<div class="pname"><h1>'+esc(p.ko)+'</h1><span class="sa">'+esc(p.sa)+'</span></div>'+
   '<div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="bg" cx="60" cy="60" r="52"/><circle class="fg" id="pfg" cx="60" cy="60" r="52" style="stroke-dasharray:'+c+';stroke-dashoffset:'+(c*(1-P.left/step[1]))+'"/></svg><div class="t" id="ptime" role="timer">'+mmss(P.left)+'</div></div>'+
+  (p.verse?'<div class="verse"><div class="dev">'+esc(p.verse.dev)+'</div><div class="rom">'+esc(p.verse.rom)+'</div><div class="mean">'+esc(p.verse.ko)+'</div></div>':'')+
   (p.flow?'<p class="move" id="pmove">'+(P.mv>=0?esc(p.flow[P.mv][0]):'')+'</p>':'')+
   (store.detail?'<p class="cue">'+esc(p.cue)+'</p>':'<p class="cue" style="color:var(--muted)">호흡에 집중하세요</p>')+
   (P.showAlt?'<div class="alt"><b>아프거나 힘들면</b><br>'+esc(p.alt)+(p.warn?'<br><span style="color:var(--warn)">'+esc(p.warn)+'</span>':'')+'</div>':'')+
