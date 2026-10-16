@@ -6,12 +6,12 @@
 <meta name="theme-color" content="#1F6B66">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="for Mrs Yoon's friends">
+<meta name="apple-mobile-web-app-title" content="매일 하타요가 for Mrs Yoon's friends">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
-<title>for Mrs Yoon's friends</title>
+<title>매일 하타요가 for Mrs Yoon's friends</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&family=Noto+Sans+Devanagari:wght@500&display=swap">
 <style>
@@ -334,7 +334,7 @@ function vToday(){
     return '<button class="mood" data-act="mood" data-v="'+m[0]+'" aria-pressed="'+(st.mood===m[0])+'"><b>'+m[1]+'</b>'+m[2]+'</button>'}).join('');
   var tchips=[[0,'전체'],[15,'~15분'],[30,'~35분'],[45,'36분~']].map(function(t){return '<button class="chip" data-act="time" data-v="'+t[0]+'" aria-pressed="'+((st.time||0)===t[0])+'">'+t[1]+'</button>'}).join('');
   var others=SEQS.filter(function(s){return s.id!==rec.id&&timeOk(s)}).map(seqRow).join('')||'<p class="note">해당 시간대의 수련이 없어요.</p>';
-  return '<header class="top"><div class="brand"><span class="om" aria-hidden="true">ॐ</span><span>for Mrs Yoon's friends</span></div><div class="date">'+(now.getMonth()+1)+'월 '+now.getDate()+'일 '+DOW[now.getDay()]+'요일</div></header>'+
+  return '<header class="top"><div class="brand"><span class="om" aria-hidden="true">ॐ</span><span>매일 하타요가 for Mrs Yoon's friends</span></div><div class="date">'+(now.getMonth()+1)+'월 '+now.getDate()+'일 '+DOW[now.getDay()]+'요일</div></header>'+
   '<section class="card"><div class="label">오늘 몸은 어때요?</div><div class="moods">'+moods+'</div></section>'+
   '<section class="card"><div class="label">'+(done?'오늘 수련 완료 · 한 번 더 해도 좋아요':'오늘의 수련')+'</div>'+
     '<h2>'+esc(rec.name)+'</h2><p class="note">'+esc(rec.desc)+' · '+mins(rec.total)+'분</p>'+
