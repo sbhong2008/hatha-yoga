@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1F6B66">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="하타요가">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>매일 하타요가</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&family=Noto+Sans+Devanagari:wght@500&display=swap">
+<style>
+/* Layout: one-thumb phone app. Big "today" card on top, five bottom tabs, full-screen practice player on top of everything. */
+:root{
+  --bg:#EDF0EA; --surface:#F8FAF6; --ink:#1E2A28; --muted:#566763; --accent:#1F6B66; --accent-ink:#FFFFFF;
+  --gold:#A8681A; --line:#D3DAD2; --warn:#A33B2B; --soft:#DDE8E2;
+  --font-display:"Noto Serif KR","Nanum Myeongjo",serif;
+  --font-body:"Noto Sans KR",-apple-system,"Apple SD Gothic Neo",sans-serif;
+  --font-deva:"Noto Sans Devanagari","Kohinoor Devanagari",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121A19; --surface:#1B2624; --ink:#E7EEEA; --muted:#9CAEA8; --accent:#5CC0B6; --accent-ink:#0C1F1D;
+  --gold:#E0B04A; --line:#2C3A37; --warn:#E58572; --soft:#22322F; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121A19; --surface:#1B2624; --ink:#E7EEEA; --muted:#9CAEA8; --accent:#5CC0B6; --accent-ink:#0C1F1D;
+  --gold:#E0B04A; --line:#2C3A37; --warn:#E58572; --soft:#22322F; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 18px/1.6 var(--font-body);
+  padding-block:0 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--font-display);line-height:1.3;margin:0;text-wrap:balance}
+h2{font-size:1.45rem} h3{font-size:1.15rem}
+p{margin:0}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px;padding-top:16px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:1.2rem}
+.om{font-family:var(--font-deva);font-size:2rem;color:var(--gold);line-height:1}
+.date{color:var(--muted);font-size:.9rem;text-align:right}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.label{font-size:.78rem;letter-spacing:.08em;color:var(--muted);font-weight:700;text-transform:uppercase}
+.btn{border:0;border-radius:16px;min-height:56px;padding:12px 20px;font-weight:700;font-size:1.1rem;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn.small{min-height:44px;font-size:1rem;padding:8px 14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grow{flex:1;min-width:0}
+.moods{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mood{border:2px solid var(--line);background:var(--surface);border-radius:16px;min-height:72px;font-size:1rem;font-weight:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.mood b{font-size:1.5rem;line-height:1}
+.mood[aria-pressed="true"]{border-color:var(--accent);background:var(--soft)}
+.week{display:flex;justify-content:space-between;gap:6px}
+.wd{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.8rem;color:var(--muted)}
+.dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.8rem}
+.dot.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.dot.today{border-color:var(--gold)}
+.streak{font-family:var(--font-display);font-size:2.4rem;color:var(--gold);line-height:1;font-variant-numeric:tabular-nums}
+.quote{font-family:var(--font-display);font-size:1.15rem;line-height:1.6}
+.quote small{display:block;font-family:var(--font-body);font-size:.85rem;color:var(--muted);margin-top:6px}
+.seq{display:flex;gap:12px;align-items:center;text-align:left;width:100%;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:14px 16px;min-height:72px}
+.seq .min{font-family:var(--font-display);font-weight:700;font-size:1.5rem;color:var(--accent);min-width:3.2rem;text-align:center;font-variant-numeric:tabular-nums}
+.seq small{color:var(--muted);display:block;font-size:.88rem;line-height:1.4}
+.steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+.steps li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:.98rem}
+.steps li span:last-child{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;border-radius:999px;background:var(--soft);padding:2px 12px;font-size:.85rem;color:var(--accent);font-weight:500}
+.pill.warn{color:var(--warn);background:transparent;border:1px solid var(--warn)}
+input[type=search],textarea{width:100%;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:12px 14px;font:inherit}
+.pose{border:1px solid var(--line);background:var(--surface);border-radius:16px;overflow:hidden}
+.pose>button{all:unset;box-sizing:border-box;width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;min-height:60px;cursor:pointer}
+.pose>button:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.pose .sa{color:var(--muted);font-size:.9rem;font-style:italic}
+.pose .body{padding:0 16px 16px;display:flex;flex-direction:column;gap:8px;font-size:1rem}
+.pose .body b{color:var(--accent)}
+/* tab bar */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(5,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+nav.tabs button{border:0;background:none;min-height:56px;border-radius:12px;font-size:.82rem;font-weight:500;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+nav.tabs button svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--soft);font-weight:700}
+/* player */
+.player{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;gap:14px;
+  padding:calc(14px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
+.player .inner{width:100%;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px;flex:1}
+.pbar{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:.95rem}
+.prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);transition:width .4s}
+.pname{text-align:center;display:flex;flex-direction:column;gap:2px}
+.pname h1{font-size:2rem}
+.pname .sa{color:var(--muted);font-style:italic}
+.ring{position:relative;width:min(62vw,250px);aspect-ratio:1;margin:0 auto}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:10}
+.ring .bg{stroke:var(--line)} .ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+.ring .t{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-size:3.4rem;font-variant-numeric:tabular-nums}
+.cue{text-align:center;font-size:1.2rem;min-height:3.6em}
+.move{text-align:center;font-family:var(--font-display);font-size:1.45rem;font-weight:700;color:var(--accent);min-height:2.6em;display:grid;place-items:center;line-height:1.35}
+.alt{background:var(--soft);border-radius:14px;padding:12px 14px;font-size:1rem}
+.ctl{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:10px;margin-top:auto}
+.ctl .btn{min-height:64px}
+.opts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{border:2px solid var(--line);background:transparent;border-radius:999px;padding:8px 16px;font-size:.98rem;min-height:44px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+/* breath */
+.orb{width:min(60vw,240px);aspect-ratio:1;border-radius:50%;margin:8px auto;background:radial-gradient(circle at 35% 30%,var(--accent),var(--soft));opacity:.9;
+  display:grid;place-items:center;text-align:center;color:var(--accent-ink);font-family:var(--font-display);font-size:1.5rem;transform:scale(.6);transition:transform 1s ease-in-out}
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.cal .h{font-size:.8rem;color:var(--muted)}
+.cal .d{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-size:.95rem;font-variant-numeric:tabular-nums}
+.cal .d.on{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.cal .d.t{outline:2px solid var(--gold)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.stats b{display:block;font-family:var(--font-display);font-size:1.7rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.stats span{font-size:.85rem;color:var(--muted)}
+.log{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:.98rem}
+.log small{color:var(--muted);display:block}
+.note{font-size:.88rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.orb,.prog i,.ring .fg{transition:none}}
+</style><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0}body{min-height:100vh}</style>
+</head>
+<body>
+
+<div class="wrap" id="app"></div>
+<nav class="tabs" id="tabs" aria-label="메뉴"></nav>
+<div id="playerHost"></div>
+
+<script>
+/* ---------- 데이터 ---------- */
+var POSES = {
+  sukhasana:{ko:'편안한 자세 · 기도',sa:'Sukhasana',cat:'준비',fx:'다리를 교차해 앉아 마음을 가라앉힙니다. 옴을 3번 읊으며 시작합니다.',cue:'편하게 앉아 손을 가슴 앞에 모읍니다. 깊게 숨 쉬고, 옴을 세 번 읊어요.',alt:'바닥이 불편하면 의자에 앉거나 엉덩이 밑에 방석을 받쳐요.',warn:'무릎이 불편하면 방석을 높이세요.'},
+  neck:{ko:'목·어깨·손목 풀기',sa:'Warm-up',cat:'준비',fx:'목, 어깨, 손목, 발목을 부드럽게 돌려 관절을 깨웁니다.',cue:'목을 천천히 좌우로 돌리고, 어깨를 크게 뒤로 돌려요.',alt:'목이 아프면 목 돌리기는 건너뛰고 어깨만 돌리세요.',warn:'목을 뒤로 젖히지 마세요.'},
+  marjari:{ko:'고양이-소 자세',sa:'Marjaryasana-Bitilasana',cat:'척추',fx:'척추를 부드럽게 움직여 허리와 등의 긴장을 풉니다.',cue:'네발 자세에서 숨을 마시며 가슴을 열고, 내쉬며 등을 둥글게 말아요.',alt:'손목이 아프면 주먹을 쥐거나 팔꿈치를 바닥에 대세요.',warn:'무릎 밑에 담요를 깔아요.'},
+  adho:{ko:'아래를 보는 개 자세',sa:'Adho Mukha Svanasana',cat:'전신',fx:'어깨, 햄스트링, 종아리를 늘리고 몸 전체를 깨웁니다.',cue:'엉덩이를 높이 들어 올려요. 무릎은 살짝 굽혀도 좋아요. 목은 편안하게.',alt:'손목이나 어깨가 불편하면 벽에 손을 짚고 상체를 숙이세요.',warn:'고혈압이 있으면 머리가 심장보다 낮은 시간을 짧게 하세요.'},
+  uttana:{ko:'서서 앞으로 굽히기',sa:'Uttanasana',cat:'전굴',fx:'허리와 햄스트링을 이완하고 머리를 식혀 줍니다.',cue:'무릎을 살짝 굽히고 상체를 내려요. 머리와 목의 힘을 빼세요.',alt:'손을 허벅지나 의자 위에 올리고 반만 숙이세요.',warn:'허리 디스크가 있으면 무릎을 많이 굽히세요.'},
+  surya:{ko:'수리야 나마스카라',sa:'Surya Namaskar',cat:'전신',fx:'태양 경배. 호흡과 동작을 맞춰 온몸을 데웁니다.',cue:'천천히 호흡에 맞춰 3바퀴 이어서 해요. 동작이 크면 작게 줄여도 됩니다.',alt:'점프나 플랭크는 생략하고, 무릎을 바닥에 내려 천천히 하세요.',warn:'어지러우면 바로 멈추고 쉬세요.'},
+  tada:{ko:'산 자세',sa:'Tadasana',cat:'선 자세',fx:'바른 자세의 기본. 발바닥과 척추의 정렬을 느낍니다.',cue:'두 발로 바닥을 누르고, 정수리는 하늘로 길게 뻗어요.',alt:'균형이 불안하면 벽에 등을 대고 서세요.',warn:''},
+  vira2:{ko:'전사 자세 2',sa:'Virabhadrasana II',cat:'선 자세',fx:'다리와 둔근을 단련하고 안정감과 집중력을 키웁니다.',cue:'발을 넓게 벌려 앞무릎을 굽히고 팔을 양옆으로 벌려요. 중간에 반대쪽으로 바꿉니다.',alt:'무릎 각도를 얕게 하거나 의자를 옆에 두고 짚으세요.',warn:'앞무릎이 발끝을 넘지 않게 하세요.',sides:true},
+  trikona:{ko:'삼각 자세',sa:'Trikonasana',cat:'선 자세',fx:'옆구리, 햄스트링, 고관절을 늘려 줍니다.',cue:'다리를 벌리고 옆으로 길게 뻗은 뒤 손을 정강이에 올려요. 중간에 반대쪽으로 바꿉니다.',alt:'손을 정강이나 의자 위에 올리세요.',warn:'목이 불편하면 시선을 정면으로.',sides:true},
+  vriksa:{ko:'나무 자세',sa:'Vrksasana',cat:'균형',fx:'균형감각과 집중력, 다리 근력을 키웁니다.',cue:'한 발로 서서 다른 발을 종아리나 허벅지 안쪽에 대요. 시선은 한 점에. 중간에 바꿉니다.',alt:'발끝만 바닥에 닿게 하고 벽을 짚으세요.',warn:'무릎 관절 위에 발을 대지 마세요.',sides:true},
+  bhujanga:{ko:'코브라 자세',sa:'Bhujangasana',cat:'후굴',fx:'가슴과 척추 기립근을 강화하고 자세를 바르게 합니다.',cue:'엎드려서 숨을 마시며 가슴을 들어 올려요. 어깨는 귀에서 멀리.',alt:'팔꿈치를 바닥에 대고 스핑크스 자세로 하세요.',warn:'허리가 아프면 높이를 낮추세요.'},
+  balasana:{ko:'아기 자세',sa:'Balasana',cat:'휴식',fx:'허리와 등을 이완하고 마음을 진정시킵니다.',cue:'무릎을 꿇고 상체를 앞으로 내려 이마를 바닥에 대요. 숨을 등으로 보냅니다.',alt:'무릎이 아프면 엉덩이 밑에 방석을 받치세요.',warn:'무릎이 불편하면 이 자세 대신 누워서 무릎을 안으세요.'},
+  setu:{ko:'다리 자세',sa:'Setu Bandhasana',cat:'후굴',fx:'둔근과 허리를 강화하고 가슴을 열어 줍니다.',cue:'누워서 무릎을 세우고 엉덩이를 들어 올려요. 어깨는 바닥에 편안히.',alt:'엉덩이 밑에 블록이나 쿠션을 받치세요.',warn:'목을 돌리지 마세요.'},
+  baddha:{ko:'나비 자세',sa:'Baddha Konasana',cat:'앉은 자세',fx:'고관절과 골반을 열고 갱년기 시기의 하복부 긴장을 풀어 줍니다.',cue:'발바닥을 마주 대고 앉아 숨을 쉬며 무릎을 가볍게 내려요. 억지로 누르지 마세요.',alt:'무릎 밑에 쿠션을 받치세요.',warn:'골반이 뻣뻣하면 상체를 숙이지 마세요.'},
+  pasci:{ko:'앉아서 앞으로 굽히기',sa:'Paschimottanasana',cat:'전굴',fx:'허리와 햄스트링을 늘려 마음을 안정시킵니다.',cue:'다리를 뻗고 앉아 등을 길게 편 채 앞으로 숙여요. 무릎은 살짝 굽혀도 좋아요.',alt:'무릎 밑에 쿠션을 받치거나 수건을 발에 걸어요.',warn:'허리를 둥글게 말지 말고 척추를 길게 유지하세요.'},
+  ardha:{ko:'앉은 비틀기',sa:'Ardha Matsyendrasana',cat:'비틀기',fx:'척추를 부드럽게 비틀어 소화를 돕고 허리를 풀어 줍니다.',cue:'숨을 마시며 척추를 길게 세우고, 내쉬며 몸통을 돌려요. 중간에 반대쪽으로 바꿉니다.',alt:'다리를 교차해 앉아서 가볍게만 비트세요.',warn:'골다공증이 있으면 깊이 비틀지 마세요.',sides:true},
+  supta:{ko:'누워서 비틀기',sa:'Supta Matsyendrasana',cat:'비틀기',fx:'허리 긴장을 풀고 잠들기 전 몸을 이완합니다.',cue:'누워서 무릎을 한쪽으로 쓰러뜨려요. 시선은 반대쪽. 중간에 바꿉니다.',alt:'무릎 사이에 쿠션을 끼우고 작은 범위로.',warn:'골다공증이 있으면 가볍게만.',sides:true},
+  apana:{ko:'무릎 가슴으로 당기기',sa:'Apanasana',cat:'휴식',fx:'아랫배와 허리를 이완하고 소화를 돕습니다.',cue:'누워서 두 무릎을 가슴으로 안고 가볍게 좌우로 흔들어요.',alt:'한쪽 무릎씩 번갈아 안으세요.',warn:'무릎이 아프면 허벅지 뒤를 잡으세요.'},
+  viparita:{ko:'다리 올리기',sa:'Viparita Karani',cat:'휴식',fx:'다리의 피로와 부종을 풀고 신경계를 가라앉힙니다. 수면에 좋습니다.',cue:'다리를 벽에 올리고 누워 눈을 감아요. 숨을 길게 내쉬세요.',alt:'벽이 없으면 의자나 침대에 종아리를 올리세요.',warn:'녹내장이나 심한 고혈압이 있으면 하지 마세요.'},
+  brahmari:{ko:'브라마리 호흡',sa:'Bhramari Pranayama',cat:'호흡',fx:'벌이 윙윙거리는 소리를 내며 날숨. 마음을 가라앉히고 긴장을 풉니다.',cue:'코로 들이쉬고, 입을 다문 채 허밍으로 길게 내쉬어요. 소리의 진동을 머리에서 느끼세요.',alt:'소리를 작게 내거나 조용히 하세요.',warn:''},
+  nadi:{ko:'나디 소다나 호흡',sa:'Nadi Shodhana',cat:'호흡',fx:'양쪽 콧구멍을 번갈아 쉬며 좌우 균형과 안정을 돕는 정화 호흡입니다.',cue:'오른손 엄지로 오른쪽 코를 막고 왼쪽으로 들이쉬고, 반대쪽으로 내쉬어요. 천천히 번갈아 하세요.',alt:'답답하면 숨 멈춤 없이 편하게.',warn:'숨을 참지 말고 편안한 범위에서만 하세요.'},
+  sava:{ko:'사바사나',sa:'Savasana',cat:'휴식',fx:'수련을 마무리하는 완전한 이완. 몸에 수련이 스며들게 합니다.',cue:'온몸의 힘을 빼고 누워요. 숨은 저절로 쉬게 두고, 몸이 바닥에 무거워지는 걸 느껴요.',alt:'허리가 아프면 무릎 밑에 쿠션을 받치세요.',warn:'추우면 담요를 덮으세요.'}
+};
+var SEQS = [
+  {id:'A',name:'아침 깨우기',mood:3,desc:'몸을 데우고 활력을 올리는 15분',steps:[['sukhasana',30],['neck',60],['marjari',60],['adho',45],['uttana',45],['surya',120],['tada',30],['vira2',60],['trikona',60],['bhujanga',40],['balasana',45],['ardha',60],['nadi',120],['sava',120]]},
+  {id:'B',name:'저녁 이완',mood:1,desc:'긴장을 풀고 잠들기 좋게 하는 15분',steps:[['sukhasana',30],['marjari',60],['balasana',60],['baddha',90],['pasci',60],['supta',90],['apana',60],['viparita',120],['brahmari',90],['sava',180]]},
+  {id:'C',name:'10분 짧은 수련',mood:2,desc:'바쁜 날에도 거르지 않는 10분',steps:[['sukhasana',30],['neck',45],['marjari',60],['adho',40],['uttana',40],['vira2',60],['bhujanga',40],['balasana',45],['supta',60],['sava',120]]}
+];
+/* ===== 숙련자용 확장 (10년 이상 수련자 기준) ===== */
+function F(a,sec){return a.map(function(t){return [t,sec]})}
+var DN=['아래를 보는 개 · 1번째 호흡','아래를 보는 개 · 2번째 호흡','아래를 보는 개 · 3번째 호흡','아래를 보는 개 · 4번째 호흡','아래를 보는 개 · 5번째 호흡'];
+var NI_PARTS=['엄지','검지','중지','약지','새끼손가락','손바닥','손등','손목','팔꿈치','어깨','겨드랑이','옆구리','허리','엉덩이','허벅지','무릎','종아리','발목','발등','발바닥','발가락'];
+var NUMS=[];for(var ni=27;ni>=1;ni--)NUMS.push('들숨 날숨 '+ni);
+Object.assign(POSES,{
+  suryaA:{ko:'수리야 나마스카라 A',sa:'Surya Namaskar A',cat:'빈야사',fx:'한 호흡에 한 동작. 우자이 호흡으로 몸을 데우고 호흡 리듬을 만듭니다. 5회 반복.',cue:'우자이 호흡으로 한 호흡에 한 동작씩 이어 갑니다.',alt:'차투랑가는 무릎을 내리고, 위를 보는 개 대신 코브라 자세로 하세요.',warn:'손목과 어깨가 불편하면 횟수를 줄이세요.',
+    flow:F(['들숨 · 팔을 위로 (우르드바 하스타사나)','날숨 · 앞으로 숙이기 (우타나사나)','들숨 · 상체 반만 들기 (아르다 우타나사나)','날숨 · 차투랑가','들숨 · 위를 보는 개 (우르드바 무카)'].concat(DN).concat(['들숨 · 앞으로 걸어오며 상체 반만 들기','날숨 · 앞으로 숙이기','들숨 · 팔을 위로','날숨 · 타다사나 합장']),5)},
+  suryaB:{ko:'수리야 나마스카라 B',sa:'Surya Namaskar B',cat:'빈야사',fx:'의자 자세와 전사 1을 넣은 더 강한 빈야사. 하체와 호흡 지구력을 키웁니다. 3회 반복.',cue:'한 호흡에 한 동작. 전사 1은 오른쪽, 왼쪽 순서입니다.',alt:'전사 1 대신 런지에서 무릎을 내리세요. 횟수를 줄여도 됩니다.',warn:'앞무릎이 발끝을 넘지 않게. 무릎이 불편하면 의자 자세를 얕게.',
+    flow:F(['들숨 · 의자 자세 (웃카타사나)','날숨 · 앞으로 숙이기','들숨 · 상체 반만 들기','날숨 · 차투랑가','들숨 · 위를 보는 개','날숨 · 아래를 보는 개','들숨 · 전사 1 오른쪽','날숨 · 차투랑가','들숨 · 위를 보는 개','날숨 · 아래를 보는 개','들숨 · 전사 1 왼쪽','날숨 · 차투랑가','들숨 · 위를 보는 개'].concat(DN).concat(['들숨 · 걸어오며 상체 반만 들기','날숨 · 앞으로 숙이기','들숨 · 의자 자세','날숨 · 타다사나']),5)},
+  om:{ko:'옴 챈팅',sa:'Aum',cat:'준비',fx:'수련 시작의 소리 의식. 호흡을 길게 하고 마음을 모읍니다.',cue:'숨을 깊이 마시고 아-우-음 소리를 길게 내며 3번 반복하세요.',alt:'소리를 내기 어려우면 속으로 읊으세요.',warn:''},
+  utkata:{ko:'의자 자세',sa:'Utkatasana',cat:'선 자세',fx:'허벅지와 둔근을 강하게 쓰고 열을 만듭니다.',cue:'앉듯이 무릎을 굽히고 꼬리뼈를 말아 허리를 길게. 팔은 귀 옆으로.',alt:'얕게 앉거나 팔을 가슴 앞에 합장.',warn:'무릎이 발끝을 넘지 않게.'},
+  vira1:{ko:'전사 자세 1',sa:'Virabhadrasana I',cat:'선 자세',fx:'고관절 앞쪽과 가슴을 열고 하체 지구력을 키웁니다.',cue:'뒷발을 45도로 눌러 골반을 정면으로. 팔을 올리고 가슴을 열어요. 중간에 반대쪽.',alt:'스탠스를 짧게 하고 뒤꿈치를 들어도 좋습니다.',warn:'목이 불편하면 시선은 정면.',sides:true},
+  parsva:{ko:'측면 각 자세',sa:'Utthita Parsvakonasana',cat:'선 자세',fx:'옆구리와 고관절, 다리 근력을 한 번에 사용합니다.',cue:'앞무릎을 굽히고 옆으로 길게. 윗팔을 귀 옆으로 뻗어 몸통 전체를 한 선으로. 중간에 반대쪽.',alt:'아래 팔꿈치를 무릎에 얹거나 블록을 쓰세요.',warn:'목에 힘을 빼고 시선은 편한 방향.',sides:true},
+  prasarita:{ko:'넓은 다리 전굴',sa:'Prasarita Padottanasana',cat:'전굴',fx:'햄스트링과 내전근을 늘리고 머리를 식힙니다.',cue:'발을 넓게 벌리고 손바닥으로 바닥을 짚어 정수리를 아래로. 척추를 길게.',alt:'손을 블록이나 의자 위에.',warn:'고혈압, 녹내장이 있으면 머리를 낮게 내리지 마세요.'},
+  ardhach:{ko:'반달 자세',sa:'Ardha Chandrasana',cat:'균형',fx:'균형, 둔근 안정성, 몸통 측면 근육을 단련합니다.',cue:'한 발로 서서 몸을 옆으로 열고 윗다리를 수평으로. 블록 사용 가능. 중간에 반대쪽.',alt:'벽에 등을 대거나 블록을 쓰세요.',warn:'',sides:true},
+  parivr:{ko:'비튼 삼각 자세',sa:'Parivrtta Trikonasana',cat:'비틀기',fx:'햄스트링을 늘리고 척추를 비틀어 균형 감각을 높입니다.',cue:'앞다리에 체중을 싣고 척추를 길게 한 채 비틀어요. 중간에 반대쪽.',alt:'손을 블록 위에 올리세요.',warn:'허리가 불편하면 비틀기는 얕게.',sides:true},
+  garuda:{ko:'독수리 자세',sa:'Garudasana',cat:'균형',fx:'어깨와 둔근을 늘리고 균형과 집중력을 키웁니다.',cue:'무릎을 굽혀 다리와 팔을 감고 앉듯이 서요. 중간에 반대쪽.',alt:'발끝을 바닥에 두거나 팔만 교차하세요.',warn:'무릎이 불편하면 다리 감기를 생략.',sides:true},
+  vira3:{ko:'전사 자세 3',sa:'Virabhadrasana III',cat:'균형',fx:'뒷몸 전체와 균형 근력을 강화합니다.',cue:'한 발로 서서 상체와 뒷다리를 수평으로. 손은 가슴 앞 합장이나 앞으로 뻗어요. 중간에 반대쪽.',alt:'손을 벽에 짚거나 블록 위에.',warn:'',sides:true},
+  natara:{ko:'춤의 왕 자세',sa:'Natarajasana',cat:'균형',fx:'후굴과 균형을 결합한 자세로 허벅지 앞과 가슴을 열어 줍니다.',cue:'뒷발을 손으로 잡고 발로 손을 밀어내며 가슴을 열어요. 중간에 반대쪽.',alt:'벨트를 발에 걸어 잡거나 벽 옆에서.',warn:'허리가 불편하면 후굴 각도를 낮추세요.',sides:true},
+  malasana:{ko:'화환 자세',sa:'Malasana',cat:'고관절',fx:'깊은 스쿼트로 고관절, 발목, 골반저를 열어 줍니다.',cue:'발을 넓게 벌려 깊이 앉아 합장한 손으로 무릎을 밀어요. 등은 길게.',alt:'뒤꿈치 밑에 담요를 받치거나 블록 위에 앉으세요.',warn:'무릎이 아프면 얕게 앉으세요.'},
+  kapota:{ko:'비둘기 자세',sa:'Eka Pada Rajakapotasana (준비)',cat:'고관절',fx:'고관절 외회전근과 이상근을 깊이 열어 좌골신경 긴장을 풀어 줍니다. 중간에 반대쪽.',cue:'앞다리를 접어 골반을 바닥 쪽으로 내리고 상체를 앞으로 숙여 호흡해요.',alt:'무릎이 불편하면 누워서 4자 자세로(발목을 반대 무릎 위에 얹고 당기기).',warn:'앞무릎에 통증이 오면 즉시 풀고 대체 동작으로.',sides:true},
+  gomukha:{ko:'소 얼굴 자세',sa:'Gomukhasana',cat:'고관절',fx:'어깨와 둔근, 고관절 외측을 동시에 열어 줍니다. 중간에 반대쪽.',cue:'무릎을 겹치고 앉아 두 손을 등 뒤에서 맞잡아요. 가슴을 열어요.',alt:'수건이나 벨트를 쥐고 하세요. 다리만 하셔도 됩니다.',warn:'무릎이 불편하면 다리 겹치기를 생략.',sides:true},
+  janu:{ko:'한쪽 무릎 접어 앞으로 숙이기',sa:'Janu Sirsasana',cat:'전굴',fx:'햄스트링과 고관절을 비대칭으로 늘리고 마음을 가라앉힙니다. 중간에 반대쪽.',cue:'한쪽 다리를 접고 척추를 길게 펴서 앞으로. 숨을 내쉬며 조금씩.',alt:'펴진 무릎을 굽히고 담요를 받치세요.',warn:'허리가 둥글게 말리지 않게.',sides:true},
+  upavis:{ko:'벌린 다리 전굴',sa:'Upavistha Konasana',cat:'전굴',fx:'내전근과 햄스트링을 길게 늘립니다.',cue:'다리를 넓게 벌려 앉아 골반을 세우고 상체를 앞으로.',alt:'엉덩이 밑에 담요를 깔고 무릎을 살짝 굽히세요.',warn:'무릎 안쪽 통증이 있으면 각도를 좁히세요.'},
+  hanuman:{ko:'반 하누만 자세',sa:'Ardha Hanumanasana',cat:'고관절',fx:'햄스트링과 장요근을 늘려 스플릿을 준비합니다. 중간에 반대쪽.',cue:'뒤무릎을 바닥에 두고 앞다리를 펴서 상체를 길게 앞으로 숙여요.',alt:'블록을 손 아래에 받치세요.',warn:'햄스트링 통증이면 무릎을 굽히세요.',sides:true},
+  marichi:{ko:'마리치 자세 3',sa:'Marichyasana III',cat:'비틀기',fx:'척추 비틀기와 복부 장기 자극에 좋습니다. 중간에 반대쪽.',cue:'한쪽 무릎을 세우고 반대 팔로 감아 비틀어요. 척추는 길게.',alt:'팔을 감지 않고 뒤로 손을 짚으세요.',warn:'골다공증이 있으면 비틀기를 얕게.',sides:true},
+  padma:{ko:'연꽃 앉기',sa:'Padmasana',cat:'앉은 자세',fx:'명상과 호흡 수련의 전통 좌법입니다.',cue:'발을 반대쪽 허벅지 위로 올려 앉아요. 무릎에 힘이 가면 즉시 풀어요.',alt:'반연꽃(아르다 파드마)이나 편한 책상다리.',warn:'무릎이 비틀리는 통증은 절대 금지.'},
+  navasana:{ko:'보트 자세',sa:'Navasana',cat:'코어',fx:'복근과 장요근을 단련하고 균형을 만듭니다.',cue:'앉은 채 다리를 들어 V자로. 가슴을 열고 척추는 곧게.',alt:'무릎을 굽히거나 손으로 허벅지 뒤를 잡으세요.',warn:'허리가 둥글게 말리면 각도를 낮추세요.'},
+  salabha:{ko:'메뚜기 자세',sa:'Salabhasana',cat:'후굴',fx:'등과 둔근을 강화하고 후굴을 준비합니다.',cue:'엎드려 가슴과 다리를 함께 들어요. 목은 길게.',alt:'다리만 또는 상체만 들어도 됩니다.',warn:'허리가 불편하면 높이를 낮추세요.'},
+  dhanura:{ko:'활 자세',sa:'Dhanurasana',cat:'후굴',fx:'가슴, 어깨, 허벅지 앞을 깊게 열고 복부 장기를 자극합니다.',cue:'발목을 잡고 발로 손을 밀어내며 가슴을 들어요. 호흡은 짧게.',alt:'한쪽씩 하거나 벨트를 사용하세요.',warn:'허리, 목이 불편하면 낮게. 고혈압이 있으면 오래 유지하지 마세요.'},
+  ustra:{ko:'낙타 자세',sa:'Ustrasana',cat:'후굴',fx:'가슴과 허벅지 앞을 열고 척추 신전을 강화합니다.',cue:'무릎을 꿇고 골반을 앞으로 밀며 손을 뒤꿈치나 허리에. 목은 편하게.',alt:'손을 허리에 두거나 블록을 발 옆에 놓으세요.',warn:'어지러우면 즉시 풀고 아기 자세로. 목을 뒤로 꺾지 마세요.'},
+  urdhvadhanu:{ko:'위를 향한 활 자세 (휠)',sa:'Urdhva Dhanurasana',cat:'후굴',fx:'전신 후굴의 정점. 가슴, 어깨, 고관절 전체의 유연성과 힘이 필요합니다.',cue:'손으로 바닥을 밀며 몸을 들어 올려요. 허벅지는 평행하게. 짧게 3호흡.',alt:'다리 자세(세투 반다)로 대체하세요.',warn:'손목, 어깨, 허리가 불편하거나 고혈압이면 하지 마세요.'},
+  sarvanga:{ko:'어깨서기',sa:'Salamba Sarvangasana',cat:'도립',fx:'하체 순환을 개선하고 신경계를 안정시킵니다.',cue:'담요를 어깨 밑에 깔고 목을 돌리지 않은 채 다리를 천장으로. 손으로 허리를 받치세요.',alt:'다리를 벽에 올리는 자세(비파리타 카라니)로 대체.',warn:'경추 디스크, 고혈압, 녹내장이 있으면 금지. 목을 돌리지 마세요.'},
+  hala:{ko:'쟁기 자세',sa:'Halasana',cat:'도립',fx:'척추 뒤쪽과 목 뒤를 길게 늘립니다.',cue:'어깨서기에서 다리를 머리 뒤로 내려요. 발끝이 닿지 않으면 의자나 블록에.',alt:'발을 의자에 올리세요.',warn:'목에 압박이 크면 즉시 풀어요.'},
+  matsya:{ko:'물고기 자세',sa:'Matsyasana',cat:'후굴',fx:'어깨서기의 반대 자세로 목과 가슴을 풀어 줍니다.',cue:'가슴을 들어 올리고 정수리를 가볍게 바닥에. 체중은 팔꿈치에.',alt:'머리 뒤에 담요를 받치고 정수리는 대지 않기.',warn:'정수리에 체중을 싣지 마세요.'},
+  sirsa:{ko:'머리서기',sa:'Salamba Sirsasana',cat:'도립',fx:'도립의 왕. 균형과 집중, 하체 순환을 개선합니다. 숙련자 전용.',cue:'팔꿈치로 체중을 받치고 목에 하중을 싣지 마세요. 벽 사용을 권장합니다.',alt:'다리를 벽에 올리는 자세나 아래를 보는 개로 대체하세요.',warn:'경추 이상, 고혈압, 녹내장, 골다공증이 있으면 하지 마세요. 어지러우면 즉시 중단.'},
+  baka:{ko:'까마귀 자세',sa:'Bakasana',cat:'균형',fx:'팔 근력, 코어, 용기를 요구하는 팔 균형입니다.',cue:'쪼그려 앉아 손으로 바닥을 짚고 무릎을 팔 위에. 앞을 보고 발을 띄워요.',alt:'발을 띄우지 않고 체중 이동만 연습하세요.',warn:'손목이 불편하면 하지 마세요. 앞에 쿠션을 두세요.'},
+  ujjayi:{ko:'우자이 호흡',sa:'Ujjayi',cat:'호흡',fx:'목 안쪽을 좁혀 바다 소리를 내는 호흡으로 집중력을 높입니다.',cue:'입을 다물고 코로, 파도 소리처럼 일정하게.',alt:'소리를 줄이고 편하게.',warn:'',flow:[['바다 소리로 길게 들이쉬세요',5],['바다 소리로 길게 내쉬세요',5]]},
+  anuloma:{ko:'아눌로마 빌로마',sa:'Anuloma Viloma',cat:'호흡',fx:'비율 호흡(1:2:2). 들숨 후 멈춤으로 호흡 지구력을 키웁니다.',cue:'오른쪽 코를 막고 왼쪽으로 4초 들이쉬고, 8초 멈춘 뒤 오른쪽으로 8초 내쉬어요. 반대쪽도 같은 방법으로.',alt:'멈춤을 4초로 줄이세요.',warn:'고혈압, 심장 질환이 있으면 숨 멈춤 없이. 어지러우면 즉시 평소 호흡.',
+    flow:[['왼쪽 코로 4초 들이쉬세요',4],['양쪽 코를 막고 8초 멈추세요',8],['오른쪽 코로 8초 내쉬세요',8],['오른쪽 코로 4초 들이쉬세요',4],['양쪽 코를 막고 8초 멈추세요',8],['왼쪽 코로 8초 내쉬세요',8]]},
+  kapala:{ko:'카팔라바티',sa:'Kapalabhati',cat:'호흡',fx:'배를 빠르게 수축시켜 날숨을 튕기는 정화 호흡. 3라운드.',cue:'들숨은 저절로. 복부를 튕기며 코로 날숨 30회. 그다음 깊게 들이쉬고 멈춥니다.',alt:'횟수를 20회로 줄이세요.',warn:'고혈압, 심장·위장 질환, 임신, 식후에는 하지 마세요. 어지러우면 즉시 중단.',
+    flow:[['배를 튕기며 코로 짧게 내쉬세요 (30회)',15],['깊게 들이쉬고 8초 멈춘 뒤 천천히 내쉬세요',15],['평소 호흡으로 쉬세요',10]]},
+  bhastrika:{ko:'바스트리카',sa:'Bhastrika',cat:'호흡',fx:'풀무 호흡. 들숨과 날숨을 모두 힘 있게 하는 활력 호흡.',cue:'들숨과 날숨을 같은 힘으로 20회, 이어서 깊게 들이쉬어 멈추세요.',alt:'속도를 늦추고 횟수를 줄이세요.',warn:'카팔라바티와 같은 주의. 어깨가 올라가지 않게.',
+    flow:[['풀무처럼 힘 있게 들이쉬고 내쉬세요 (20회)',15],['깊게 들이쉬고 8초 멈추세요',8],['천천히 길게 내쉬세요',10],['평소 호흡으로 쉬세요',10]]},
+  sheetali:{ko:'시탈리',sa:'Sheetali',cat:'호흡',fx:'혀를 말아 들이쉬는 냉각 호흡. 열을 식히고 진정시킵니다.',cue:'혀를 관처럼 말아 들이쉬고, 입을 다물고 코로 내쉬세요.',alt:'혀를 말기 어려우면 시트카리(이를 맞물려 들이쉬기).',warn:'추운 날씨나 저혈압에서는 약하게.',flow:[['혀를 말아 4초 들이쉬세요',4],['입을 다물고 코로 6초 내쉬세요',6]]},
+  bandha:{ko:'반다 연습',sa:'Mula & Uddiyana Bandha',cat:'호흡',fx:'날숨 끝에서 골반저와 복부를 끌어올립니다.',cue:'내쉰 뒤 물라 반다, 이어서 웃디야나 반다를 짧게. 힘주지 말고 가볍게.',alt:'물라 반다만 연습하세요.',warn:'식후, 고혈압, 위궤양, 임신 중에는 하지 마세요.',
+    flow:[['내쉬며 물라 반다, 골반저를 끌어올리세요',6],['숨을 비운 채 웃디야나 반다, 배를 안으로 끌어올리세요',5],['풀고 천천히 들이쉬세요',5]]},
+  sohum:{ko:'소-함 명상',sa:'So-Ham',cat:'명상',fx:'호흡 소리에 만트라를 얹어 마음을 한곳에 모읍니다.',cue:'들숨에 속으로 "소", 날숨에 "함". 생각이 오면 다시 호흡으로.',alt:'숨 세기로 대체하세요.',warn:'',flow:[['들이쉬며 속으로 "소"',5],['내쉬며 속으로 "함"',5]]},
+  trataka:{ko:'트라타카',sa:'Trataka',cat:'명상',fx:'한 점을 응시해 집중력을 기르는 정화법. 촛불이나 점을 이용합니다.',cue:'눈높이의 한 점을 깜박임 없이 바라보다가 눈을 감고 잔상을 보세요.',alt:'눈이 아프면 시간을 줄이세요.',warn:'녹내장이나 눈의 질환이 있으면 하지 마세요.',
+    flow:[['눈을 뜨고 한 점을 부드럽게 응시하세요',60],['눈을 감고 잔상을 바라보세요',30]]},
+  nada:{ko:'나다 명상',sa:'Nada',cat:'명상',fx:'안쪽 소리에 귀 기울이는 명상.',cue:'귀 안쪽의 가는 소리를 그저 듣습니다.',alt:'바깥 소리를 들어도 좋습니다.',warn:''},
+  nidra1:{ko:'요가 니드라 · 결심과 몸 의식',sa:'Yoga Nidra',cat:'명상',fx:'누워 몸 전체를 의식하며 이완합니다.',cue:'편하게 누워 움직이지 않겠다고 다짐하고 몸 전체를 의식하세요. 마음속으로 결심 한 문장을 세 번.',alt:'무릎 밑에 쿠션을 받치세요.',warn:'졸아도 괜찮습니다.'},
+  nidra2:{ko:'요가 니드라 · 오른쪽 순회',sa:'Rotation of consciousness',cat:'명상',fx:'부위마다 의식을 옮깁니다.',cue:'호명하는 부위에 의식만 보내세요. 움직이지 않습니다.',alt:'',warn:'',flow:F(NI_PARTS.map(function(x){return '오른쪽 '+x}),5)},
+  nidra3:{ko:'요가 니드라 · 왼쪽 순회',sa:'Rotation of consciousness',cat:'명상',fx:'부위마다 의식을 옮깁니다.',cue:'호명하는 부위에 의식만 보내세요.',alt:'',warn:'',flow:F(NI_PARTS.map(function(x){return '왼쪽 '+x}),5)},
+  nidra4:{ko:'요가 니드라 · 몸통과 머리',sa:'Rotation of consciousness',cat:'명상',fx:'몸통과 얼굴로 의식을 옮깁니다.',cue:'부위에 의식을 보내세요.',alt:'',warn:'',flow:F(['등 아래쪽','등 중간','어깨뼈','복부','가슴','목','턱','입술','혀','코','볼','눈','눈썹 사이','이마','정수리','몸 전체'],5)},
+  nidra5:{ko:'요가 니드라 · 호흡 세기',sa:'Breath awareness',cat:'명상',fx:'숨을 거꾸로 세며 마음을 가라앉힙니다.',cue:'숨을 마시고 내쉬며 27부터 1까지 센 뒤, 놓치면 처음부터.',alt:'',warn:'',flow:F(NUMS,6)},
+  nidra6:{ko:'요가 니드라 · 귀환',sa:'Return',cat:'명상',fx:'천천히 일상으로 돌아옵니다.',cue:'숨이 깊어지게 두고 손가락, 발가락을 움직이세요. 결심 문장을 다시 세 번 떠올리고 눈을 뜨세요.',alt:'',warn:''}
+});
+POSES.brahmari.flow=[['코로 4초 들이쉬세요',4],['허밍으로 8초 길게 내쉬세요',8]];
+(function(){
+  function add(id,name,grp,desc,steps,mood){SEQS.push({id:id,name:name,grp:grp,desc:desc,steps:steps,mood:mood})}
+  SEQS.forEach(function(s){s.grp='회복 · 기본';s.mood=null});
+  seqById('B').mood=1;
+  add('D','하타 중급 · 균형','하타 정식','수리야 A와 선 자세, 전굴, 비율 호흡의 압축판',
+    [['om',30],['neck',45],['marjari',45],['suryaA',210],['utkata',40],['vira1',60],['vira2',60],['trikona',60],['parsva',60],['uttana',40],['bhujanga',40],['setu',45],['supta',60],['pasci',60],['anuloma',150],['sava',180]],2);
+  add('E','하타 정식 · 표준','하타 정식','워밍업, 수리야 A·B, 선 자세, 후굴, 전굴, 어깨서기, 호흡, 사바사나',
+    [['om',60],['neck',60],['marjari',60],['suryaA',350],['suryaB',330],['utkata',40],['vira1',70],['vira2',70],['trikona',70],['parsva',70],['prasarita',45],['vriksa',60],['bhujanga',40],['salabha',40],['dhanura',45],['balasana',45],['janu',90],['pasci',60],['marichi',90],['supta',90],['sarvanga',180],['hala',60],['matsya',60],['anuloma',240],['sava',240]],3);
+  add('H','하타 정식 · 완전판','하타 정식','카팔라바티부터 머리서기, 명상까지 이어지는 전체 구성',
+    [['om',90],['neck',60],['marjari',60],['kapala',120],['suryaA',350],['suryaB',330],['utkata',40],['vira1',70],['vira2',70],['trikona',70],['parsva',70],['parivr',70],['ardhach',70],['prasarita',45],['garuda',60],['vriksa',60],['natara',70],['bhujanga',40],['salabha',40],['dhanura',45],['ustra',45],['balasana',45],['kapota',140],['janu',90],['pasci',60],['marichi',90],['supta',90],['sirsa',150],['balasana',45],['sarvanga',240],['hala',90],['matsya',90],['anuloma',300],['sohum',180],['sava',300]],null);
+  add('G','고관절 심화','집중 수련','깊은 고관절 열기와 비둘기, 소 얼굴, 반 하누만',
+    [['om',30],['marjari',60],['suryaA',210],['vira2',60],['malasana',60],['baddha',90],['upavis',90],['hanuman',120],['kapota',160],['gomukha',90],['janu',90],['marichi',90],['supta',90],['apana',60],['sava',240]],null);
+  add('K','후굴 · 가슴 열기','집중 수련','메뚜기, 활, 낙타, 휠로 이어지는 후굴 시퀀스',
+    [['om',30],['neck',45],['marjari',60],['suryaA',210],['suryaB',330],['bhujanga',40],['salabha',40],['dhanura',50],['ustra',45],['balasana',45],['setu',60],['urdhvadhanu',40],['apana',45],['supta',60],['sava',180]],null);
+  add('I','도립 연습','집중 수련','어깨서기 중심, 머리서기는 숙련자 선택',
+    [['marjari',60],['adho',45],['uttana',40],['suryaA',210],['malasana',45],['baka',45],['setu',45],['sirsa',150],['balasana',60],['sarvanga',240],['hala',90],['matsya',90],['supta',60],['sava',180]],null);
+  add('J','균형 · 코어','집중 수련','선 자세 균형과 보트, 까마귀',
+    [['om',30],['suryaA',210],['utkata',40],['vira2',60],['trikona',60],['parivr',70],['vriksa',60],['garuda',60],['ardhach',70],['vira3',70],['natara',70],['navasana',60],['baka',45],['balasana',45],['sava',120]],null);
+  add('P','프라나야마 집중','호흡 · 명상','우자이, 카팔라바티, 바스트리카, 아눌로마, 반다, 명상',
+    [['om',60],['ujjayi',120],['kapala',120],['bhastrika',130],['anuloma',240],['sheetali',90],['brahmari',120],['bandha',96],['sohum',300],['sava',120]],null);
+  add('N','요가 니드라','호흡 · 명상','누운 채 몸을 순회하고 호흡을 세는 깊은 이완',
+    [['nidra1',90],['nidra2',105],['nidra3',105],['nidra4',80],['nidra5',162],['nidra6',60]],null);
+  add('M','명상 · 트라타카와 소함','호흡 · 명상','좌법에서 응시, 만트라, 소리 관찰까지',
+    [['om',60],['trataka',270],['sohum',420],['nada',240]],null);
+})();
+SEQS.forEach(function(s){s.total=s.steps.reduce(function(a,b){return a+b[1]},0)});
+var BREATHS = [
+  {id:'nadi',name:'나디 소다나',sa:'Nadi Shodhana',pat:[4,2,4,0],rounds:10,desc:'좌우 콧구멍을 번갈아 쉬는 정화 호흡. 마음이 어수선할 때.',how:'오른손 엄지로 오른쪽 코를 막고 왼쪽으로 들이쉬고, 약지로 왼쪽을 막고 오른쪽으로 내쉽니다. 다음엔 오른쪽으로 들이쉬고 왼쪽으로 내쉬는 것이 1회입니다.'},
+  {id:'ujjayi',name:'우자이',sa:'Ujjayi',pat:[5,0,5,0],rounds:12,desc:'목 뒤를 살짝 좁혀 바다 소리를 내는 호흡. 수련 중 집중에.',how:'입을 다물고 코로 쉬며 목 안쪽에서 부드러운 파도 소리를 냅니다. 얼굴 힘은 빼세요.'},
+  {id:'brah',name:'브라마리',sa:'Bhramari',pat:[4,0,8,0],rounds:8,desc:'허밍으로 내쉬는 벌 소리 호흡. 불안과 불면에.',how:'코로 들이쉬고, 입을 다문 채 "음~" 소리를 내며 길게 내쉽니다.'},
+  {id:'sleep',name:'4-7-8 수면 호흡',sa:'Relaxing breath',pat:[4,7,8,0],rounds:6,desc:'잠들기 전, 숨을 길게 내쉬며 몸을 가라앉힙니다.',how:'코로 4초 들이쉬고 7초 멈춘 뒤 입으로 8초 길게 내쉽니다. 어지러우면 멈춤을 줄이세요.'}
+];
+var CARDS = [
+  {t:'8지 요가',b:'파탄잘리의 요가 수트라가 말하는 여덟 단계: 야마(윤리), 니야마(수행 규칙), 아사나(자세), 프라나야마(호흡), 프라티야하라(감각 거두기), 다라나(집중), 디야나(명상), 사마디(합일). 우리가 매트에서 하는 건 이 중 세 번째와 네 번째입니다.'},
+  {t:'프라나',b:'호흡과 함께 몸에 흐른다고 보는 생명 에너지입니다. 하타요가는 아사나와 프라나야마로 이 흐름을 고르게 합니다.'},
+  {t:'하타요가란',b:'하(ha, 태양)와 타(tha, 달)가 합쳐진 말로 알려져 있습니다. 몸과 호흡을 통해 마음을 가라앉히는 신체 수련 전통입니다.'},
+  {t:'아힘사',b:'야마의 첫 번째로 "해치지 않음"입니다. 다른 사람뿐 아니라 내 몸에도 적용합니다. 아프면 멈추는 것도 수련입니다.'},
+  {t:'반다',b:'몸의 특정 부위를 가볍게 조이는 기법입니다. 물라 반다(골반저), 웃디야나 반다(복부), 잘란다라 반다(턱을 당김). 처음엔 힘주지 말고 개념만 익히세요.'},
+  {t:'스티라와 수카',b:'"스티라 수캄 아사남". 자세는 안정되고(스티라) 편안해야(수카) 한다는 요가 수트라 2장 46절 구절입니다. 둘 중 하나가 무너지면 힘을 빼세요.'},
+  {t:'차크라',b:'척추를 따라 있다고 보는 일곱 에너지 중심입니다. 물라다라(회음), 스와디스타나, 마니푸라, 아나하타(가슴), 비슈다, 아즈나(미간), 사하스라라(정수리).'},
+  {t:'무드라',b:'손이나 몸으로 만드는 인장입니다. 명상에서 많이 쓰는 갸나 무드라는 엄지와 검지 끝을 맞대고 나머지 세 손가락을 편 모양입니다.'},
+  {t:'사바사나',b:'송장 자세라는 뜻이지만 가장 어려운 자세라고 합니다. 가만히 있는 연습입니다. 최소 3분은 지키세요.'},
+  {t:'우자이 호흡',b:'"승리의 호흡". 목 안쪽을 살짝 좁혀 코로 바다 소리를 냅니다. 호흡을 길고 일정하게 만들어 집중을 돕습니다.'},
+  {t:'구나',b:'세상을 이루는 세 가지 성질. 사트바(고요), 라자스(활동), 타마스(무거움). 아침 수련은 라자스를, 저녁 수련은 사트바를 키우는 쪽으로 구성했습니다.'},
+  {t:'쿰바카 (숨 멈춤)',b:'들숨 후 멈춤은 안타라 쿰바카, 날숨 후 멈춤은 바히르 쿰바카입니다. 비율은 1:2:2에서 시작해 1:4:2로 천천히 늘리세요. 어지럽거나 불편하면 비율을 줄이는 것이 수련입니다.'},
+  {t:'트리 반다',b:'물라 반다, 웃디야나 반다, 잘란다라 반다를 함께 쓰는 것을 마하 반다라 부릅니다. 날숨 끝에서만 연습하고, 식후나 고혈압이 있을 때는 피하세요.'},
+  {t:'카운터 포즈 원칙',b:'강한 후굴 뒤에는 가벼운 전굴(아기 자세), 어깨서기 뒤에는 물고기 자세, 비틀기 뒤에는 중립 자세로 척추를 균형 있게 돌려놓습니다.'},
+  {t:'50대 이후의 수련 조정',b:'호르몬 변화로 관절과 골밀도가 달라집니다. 깊은 비틀기와 강한 후굴, 경추에 하중이 가는 도립은 조정하고, 하체 근력과 균형, 호흡 수련 비중을 높이는 것이 안전하고 지속 가능합니다.'},
+  {t:'하타요가 프라디피카',b:'15세기 스바트마라마의 하타요가 고전입니다. 아사나, 쿰바카, 무드라, 나다 수련을 다룹니다. 이 앱의 순서(아사나, 호흡, 명상)도 이 구성을 따릅니다.'},
+  {t:'빈야사 크라마',b:'동작에서 동작으로 호흡에 맞춰 단계적으로 들어가고 나오는 방식입니다. 아사나에 들어가는 길도 수련의 일부입니다.'},
+  {t:'프라티야하라',b:'감각을 바깥에서 거두어 안으로 향하게 하는 단계입니다. 요가 니드라와 트라타카는 이 단계의 실습입니다.'},
+  {t:'요가 니드라',b:'"요가의 잠". 의식이 깨어 있는 채 몸을 깊게 이완하는 안내 명상입니다. 수면의 질을 높이는 데 쓰입니다.'}
+];
+var QUOTES = [
+  {q:'자세는 안정되고 편안해야 한다.',s:'요가 수트라 2.46'},
+  {q:'요가는 마음의 작용을 가라앉히는 것이다.',s:'요가 수트라 1.2'},
+  {q:'꾸준한 수련과 집착하지 않음으로 마음은 고요해진다.',s:'요가 수트라 1.12 (의역)'}
+];
+var DOW = ['일','월','화','수','목','금','토'];
+var PLACES = ['거실','베란다','요가원','공원','기타'];
+
+/* ---------- 저장 ---------- */
+var store = {log:{}, voice:true, detail:true};
+function load(){try{var r=localStorage.getItem('hatha.v1');if(r){var o=JSON.parse(r);if(o)Object.keys(o).forEach(function(k){store[k]=o[k]})}}catch(e){}}
+function save(){try{localStorage.setItem('hatha.v1',JSON.stringify(store))}catch(e){}}
+load();
+
+/* ---------- 유틸 ---------- */
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function key(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function dayOfYear(d){return Math.floor((d-new Date(d.getFullYear(),0,0))/864e5)}
+function mmss(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function mins(s){return Math.round(s/60)}
+function streak(){var n=0,d=new Date();if(!store.log[key(d)])d.setDate(d.getDate()-1);while(store.log[key(d)]){n++;d.setDate(d.getDate()-1)}return n}
+function totalMin(){var t=0;Object.keys(store.log).forEach(function(k){t+=store.log[k].sec||0});return Math.round(t/60)}
+
+/* ---------- 상태 ---------- */
+var st = {tab:'today', mood:null, q:'', open:null, breath:'nadi', calOff:0};
+var TABS = [
+  ['today','오늘','<path d="M12 3v3M4.5 7.5l2 2M19.5 7.5l-2 2M3 15h18M7 15a5 5 0 0 1 10 0"/><path d="M5 20h14"/>'],
+  ['seq','수련','<circle cx="12" cy="5" r="2"/><path d="M12 8v5M7 21l5-8 5 8M5 11l7-2 7 2"/>'],
+  ['theory','이론','<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h5"/>'],
+  ['breath','호흡','<path d="M3 12c3-5 6-5 9 0s6 5 9 0"/><path d="M3 17c3-4 6-4 9 0s6 4 9 0" opacity=".5"/>'],
+  ['log','기록','<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>']
+];
+
+/* ---------- 화면 ---------- */
+var app = document.getElementById('app');
+function seqById(id){return SEQS.filter(function(s){return s.id===id})[0]}
+function recommended(){
+  if(st.mood){return SEQS.filter(function(s){return s.mood===st.mood})[0]}
+  return new Date().getHours()>=17 ? seqById('B') : seqById('D');
+}
+var GROUPS=['하타 정식','집중 수련','호흡 · 명상','회복 · 기본'];
+function timeOk(s){var m=s.total/60;return !st.time||(st.time===15&&m<=17)||(st.time===30&&m>17&&m<=35)||(st.time===45&&m>35)}
+function render(){
+  var tabsEl=document.getElementById('tabs');
+  tabsEl.innerHTML=TABS.map(function(t){return '<button data-act="tab" data-v="'+t[0]+'"'+(st.tab===t[0]?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+t[2]+'</svg>'+t[1]+'</button>'}).join('');
+  var v={today:vToday,seq:vSeq,theory:vTheory,breath:vBreath,log:vLog}[st.tab]();
+  app.innerHTML=v;
+  if(st.tab==='breath')bpaint();
+}
+function vToday(){
+  var now=new Date(), rec=recommended(), done=!!store.log[key(now)];
+  var sn=streak();
+  var wk='';var start=new Date(now);start.setDate(now.getDate()-now.getDay());
+  for(var i=0;i<7;i++){var d=new Date(start);d.setDate(start.getDate()+i);var on=!!store.log[key(d)];
+    wk+='<div class="wd"><div class="dot'+(on?' on':'')+(key(d)===key(now)?' today':'')+'">'+(on?'✓':'')+'</div>'+DOW[i]+'</div>'}
+  var q=QUOTES[dayOfYear(now)%QUOTES.length];
+  var moods=[[1,'😣','몸이 무거워요'],[2,'😐','보통이에요'],[3,'😊','가벼워요']].map(function(m){
+    return '<button class="mood" data-act="mood" data-v="'+m[0]+'" aria-pressed="'+(st.mood===m[0])+'"><b>'+m[1]+'</b>'+m[2]+'</button>'}).join('');
+  var tchips=[[0,'전체'],[15,'~15분'],[30,'~35분'],[45,'36분~']].map(function(t){return '<button class="chip" data-act="time" data-v="'+t[0]+'" aria-pressed="'+((st.time||0)===t[0])+'">'+t[1]+'</button>'}).join('');
+  var others=SEQS.filter(function(s){return s.id!==rec.id&&timeOk(s)}).map(seqRow).join('')||'<p class="note">해당 시간대의 수련이 없어요.</p>';
+  return '<header class="top"><div class="brand"><span class="om" aria-hidden="true">ॐ</span>매일 하타요가</div><div class="date">'+(now.getMonth()+1)+'월 '+now.getDate()+'일 '+DOW[now.getDay()]+'요일</div></header>'+
+  '<section class="card"><div class="label">오늘 몸은 어때요?</div><div class="moods">'+moods+'</div></section>'+
+  '<section class="card"><div class="label">'+(done?'오늘 수련 완료 · 한 번 더 해도 좋아요':'오늘의 수련')+'</div>'+
+    '<h2>'+esc(rec.name)+'</h2><p class="note">'+esc(rec.desc)+' · '+mins(rec.total)+'분</p>'+
+    '<button class="btn" data-act="play" data-v="'+rec.id+'">수련 시작</button></section>'+
+  '<section class="card"><div class="row"><div><div class="label">연속 수련</div><div class="streak">'+sn+'<span style="font-size:1rem;color:var(--muted);font-family:var(--font-body)"> 일</span></div></div></div><div class="week">'+wk+'</div></section>'+
+  '<section class="card quote">“'+esc(q.q)+'”<small>'+esc(q.s)+'</small></section>'+
+  '<div class="label">시간으로 고르기</div><div class="opts" style="justify-content:flex-start">'+tchips+'</div>'+others;
+}
+function seqRow(s){return '<button class="seq" data-act="play" data-v="'+s.id+'"><span class="min">'+mins(s.total)+'<small style="display:block;font-size:.7rem;font-family:var(--font-body);font-weight:400;color:var(--muted)">분</small></span><span class="grow"><b>'+esc(s.name)+'</b><small>'+esc(s.desc)+'</small></span></button>'}
+function vSeq(){
+  return '<header class="top"><h2>수련</h2></header>'+
+  '<p class="note">정해진 순서를 반복하는 하타요가 시퀀스입니다. 시작하면 음성이 안내합니다.</p>'+
+  GROUPS.map(function(g){
+    var items=SEQS.filter(function(s){return s.grp===g});
+    return '<div class="label">'+g+'</div>'+items.map(function(s){
+    var open=st.seqOpen===s.id;
+    return '<section class="card"><div class="row"><h3 class="grow">'+esc(s.name)+'</h3><span class="pill">'+mins(s.total)+'분</span></div><p class="note">'+esc(s.desc)+'</p>'+
+    (open?'<ul class="steps">'+s.steps.map(function(x){return '<li><span>'+esc(POSES[x[0]].ko)+'</span><span>'+mmss(x[1])+'</span></li>'}).join('')+'</ul>':'')+
+    '<div class="row"><button class="btn grow" data-act="play" data-v="'+s.id+'">시작</button><button class="btn ghost" data-act="seqopen" data-v="'+s.id+'">'+(open?'접기':'순서 보기')+'</button></div></section>'}).join('')}).join('')+
+  '<p class="note">아프거나 어지러우면 즉시 멈추세요. 혈압, 골다공증, 관절 질환이 있으면 의사와 상의하세요.</p>';
+}
+function vTheory(){
+  var c=CARDS[dayOfYear(new Date())%CARDS.length];
+  var q=st.q.trim().toLowerCase();
+  var cats=['전체'];Object.keys(POSES).forEach(function(id){if(cats.indexOf(POSES[id].cat)<0)cats.push(POSES[id].cat)});
+  var cchips=cats.map(function(c){return '<button class="chip" data-act="cat" data-v="'+c+'" aria-pressed="'+((st.cat||'전체')===c)+'">'+c+'</button>'}).join('');
+  var ids=Object.keys(POSES).filter(function(id){var p=POSES[id];return (!st.cat||st.cat==='전체'||p.cat===st.cat)&&(!q||(p.ko+' '+p.sa+' '+p.cat).toLowerCase().indexOf(q)>=0)});
+  var list=ids.map(function(id){var p=POSES[id],o=st.open===id;
+    return '<div class="pose"><button data-act="open" data-v="'+id+'" aria-expanded="'+o+'"><span><b>'+esc(p.ko)+'</b><br><span class="sa">'+esc(p.sa)+'</span></span><span class="pill">'+esc(p.cat)+'</span></button>'+
+    (o?'<div class="body"><p>'+esc(p.fx)+'</p><p><b>이렇게</b> '+esc(p.cue)+'</p><p><b>힘들면</b> '+esc(p.alt)+'</p>'+(p.warn?'<p><span class="pill warn">주의</span> '+esc(p.warn)+'</p>':'')+'</div>':'')+'</div>'}).join('');
+  return '<header class="top"><h2>이론</h2></header>'+
+  '<section class="card"><div class="label">오늘의 한 장 · 1분</div><h3>'+esc(c.t)+'</h3><p>'+esc(c.b)+'</p></section>'+
+  '<div class="label">아사나 사전 ('+ids.length+')</div>'+
+  '<input type="search" id="q" placeholder="이름으로 찾기 (예: 코브라, Tadasana)" value="'+esc(st.q)+'" aria-label="아사나 검색">'+
+  '<div class="opts" style="justify-content:flex-start">'+cchips+'</div>'+
+  '<div class="stack" style="display:flex;flex-direction:column;gap:10px">'+list+'</div>';
+}
+function vBreath(){
+  var b=BREATHS.filter(function(x){return x.id===st.breath})[0];
+  var chips=BREATHS.map(function(x){return '<button class="chip" data-act="bsel" data-v="'+x.id+'" aria-pressed="'+(x.id===st.breath)+'">'+esc(x.name)+'</button>'}).join('');
+  return '<header class="top"><h2>호흡 · 명상</h2></header>'+
+  '<div class="opts" style="justify-content:flex-start">'+chips+'</div>'+
+  '<section class="card"><h3>'+esc(b.name)+' <span class="sa" style="font-size:.9rem;color:var(--muted);font-weight:400;font-family:var(--font-body)">'+esc(b.sa)+'</span></h3><p>'+esc(b.desc)+'</p>'+
+    '<div class="orb" id="orb" aria-live="polite"><span id="olab">준비</span></div>'+
+    '<p class="note" style="text-align:center" id="ocnt">'+b.rounds+'회 · 들숨 '+b.pat[0]+(b.pat[1]?' · 멈춤 '+b.pat[1]:'')+' · 날숨 '+b.pat[2]+'</p>'+
+    '<button class="btn" data-act="bstart" id="bbtn">'+(B.run?'멈추기':'시작')+'</button>'+
+    '<p class="note">'+esc(b.how)+'</p></section>'+
+  '<section class="card"><h3>고급 호흡 · 명상</h3><p class="note">시간 단위로 안내가 이어지는 수련입니다. 시작하면 전체 화면 타이머가 열립니다.</p>'+
+  [['anuloma',240],['kapala',120],['bhastrika',130],['sheetali',90],['ujjayi',120],['bandha',96],['sohum',300],['trataka',270]].map(function(x){var p=POSES[x[0]];
+    return '<button class="seq" data-act="solo" data-v="'+x[0]+':'+x[1]+'"><span class="min">'+mins(x[1])+'</span><span class="grow"><b>'+esc(p.ko)+'</b><small>'+esc(p.fx)+'</small></span></button>'}).join('')+'</section>'+
+  '<section class="card"><h3>명상 타이머</h3><p class="note">편하게 앉아 호흡만 느껴요. 끝나면 종소리가 납니다.</p><div class="row">'+
+  [3,5,10].map(function(m){return '<button class="btn ghost small grow" data-act="med" data-v="'+m+'">'+m+'분</button>'}).join('')+'</div></section>'+
+  '<p class="note">어지럽거나 답답하면 바로 평소 호흡으로 돌아오세요.</p>';
+}
+function vLog(){
+  var now=new Date(), base=new Date(now.getFullYear(),now.getMonth()+st.calOff,1);
+  var first=base.getDay(), dim=new Date(base.getFullYear(),base.getMonth()+1,0).getDate();
+  var cells=DOW.map(function(d){return '<div class="h">'+d+'</div>'}).join('');
+  for(var i=0;i<first;i++)cells+='<div></div>';
+  var cnt=0;
+  for(var d=1;d<=dim;d++){var k=key(new Date(base.getFullYear(),base.getMonth(),d));var on=!!store.log[k];if(on)cnt++;
+    cells+='<div class="d'+(on?' on':'')+(k===key(now)?' t':'')+'">'+d+'</div>'}
+  var recent=Object.keys(store.log).sort().reverse().slice(0,8).map(function(k){var l=store.log[k];
+    return '<div class="log"><span><b>'+k.slice(5).replace('-','월 ')+'일</b><small>'+esc(l.name||'')+(l.place?' · '+esc(l.place):'')+(l.note?'<br>'+esc(l.note):'')+'</small></span><span>'+mins(l.sec||0)+'분</span></div>'}).join('');
+  return '<header class="top"><h2>기록</h2></header>'+
+  '<section class="stats card" style="flex-direction:row;justify-content:space-around"><div><b>'+streak()+'</b><span>연속 일</span></div><div><b>'+cnt+'</b><span>이번 달</span></div><div><b>'+totalMin()+'</b><span>총 분</span></div></section>'+
+  '<section class="card"><div class="row" style="justify-content:space-between"><button class="btn ghost small" data-act="cal" data-v="-1" aria-label="이전 달">‹</button><h3>'+base.getFullYear()+'년 '+(base.getMonth()+1)+'월</h3><button class="btn ghost small" data-act="cal" data-v="1" aria-label="다음 달">›</button></div><div class="cal">'+cells+'</div></section>'+
+  '<section class="card"><div class="label">최근 수련</div>'+(recent||'<p class="note">아직 기록이 없어요. 첫 수련을 마치면 여기에 쌓입니다.</p>')+'</section>'+
+  '<section class="card"><div class="label">설정</div><div class="row"><button class="chip" data-act="tg" data-v="voice" aria-pressed="'+store.voice+'">음성 안내</button><button class="chip" data-act="tg" data-v="detail" aria-pressed="'+store.detail+'">자세 해설 보기</button></div>'+
+  '<p class="note">기록은 이 폰의 사파리에만 저장됩니다.</p></section>';
+}
+
+/* ---------- 소리 ---------- */
+var AC=null;
+function bell(f){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f||660;
+  g.gain.setValueAtTime(0.0001,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.25,AC.currentTime+0.02);g.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+1.4);
+  o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+1.5)}catch(e){}}
+function say(t){if(!store.voice)return;try{if(!window.speechSynthesis)return;speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ko-KR';u.rate=0.9;speechSynthesis.speak(u)}catch(e){}}
+var wake=null;
+function wakeOn(){try{if(navigator.wakeLock)navigator.wakeLock.request('screen').then(function(l){wake=l}).catch(function(){})}catch(e){}}
+function wakeOff(){try{if(wake){wake.release();wake=null}}catch(e){}}
+
+/* ---------- 플레이어 ---------- */
+var P=null, host=document.getElementById('playerHost');
+function startPlay(id){
+  var s;
+  if(id.indexOf(':')>0){var pr=id.split(':'),pp=POSES[pr[0]];s={id:'solo',name:pp.ko,steps:[[pr[0],+pr[1]]],total:+pr[1]}}
+  else s=seqById(id);
+  if(!s)return;
+  P={seq:s,i:0,paused:false,left:0,end:0,half:false,showAlt:false,total:0,done:false,place:'',note:'',startedAt:Date.now()};
+  bell(523);wakeOn();enter(0);
+  P.timer=setInterval(tick,250);
+}
+function enter(i){
+  P.i=i;var step=P.seq.steps[i],p=POSES[step[0]];
+  P.left=step[1];P.end=Date.now()+P.left*1000;P.half=false;P.showAlt=false;P.mv=-1;
+  if(!p.flow)say(p.ko+(store.detail?'. '+p.cue:''));
+  paint();
+  if(p.flow)flowTick(p,step);
+}
+function flowCyc(p){if(!p._cyc)p._cyc=p.flow.reduce(function(a,m){return a+m[1]},0);return p._cyc}
+function flowIdx(p,el){var pos=el%flowCyc(p),acc=0;for(var i=0;i<p.flow.length;i++){acc+=p.flow[i][1];if(pos<acc)return i}return p.flow.length-1}
+function flowTick(p,step){
+  var i=flowIdx(p,step[1]-P.left);
+  if(i!==P.mv){P.mv=i;var t=p.flow[i][0],e=document.getElementById('pmove');if(e)e.textContent=t;say(t)}
+}
+function tick(){
+  if(!P||P.done||P.paused)return;
+  var step=P.seq.steps[P.i],p=POSES[step[0]];
+  P.left=Math.max(0,(P.end-Date.now())/1000);
+  if(p.sides&&!P.half&&P.left<=step[1]/2){P.half=true;bell(440);say('반대쪽으로 바꿔요')}
+  if(p.flow&&P.left>0)flowTick(p,step);
+  if(P.left<=0){
+    bell(660);
+    if(P.i+1>=P.seq.steps.length){finish();return}
+    P.total+=step[1];enter(P.i+1);return;
+  }
+  paintTime();
+}
+function finish(){
+  P.done=true;clearInterval(P.timer);wakeOff();
+  P.total=P.seq.total;bell(392);say('수고하셨습니다. 오늘 수련을 마쳤어요.');paint();
+}
+function closePlayer(){if(P){clearInterval(P.timer)}wakeOff();try{speechSynthesis.cancel()}catch(e){}P=null;host.innerHTML='';render()}
+function paintTime(){
+  var t=document.getElementById('ptime');if(!t)return;
+  var step=P.seq.steps[P.i];t.textContent=mmss(P.left);
+  var c=2*Math.PI*52;document.getElementById('pfg').style.strokeDashoffset=c*(1-(P.left/step[1]));
+}
+function paint(){
+  if(!P)return;
+  if(P.done){
+    host.innerHTML='<div class="player"><div class="inner"><div class="pname" style="margin-top:20px"><span class="om" style="font-size:3rem">ॐ</span><h1>수련 완료</h1><p class="note">'+esc(P.seq.name)+' · '+mins(P.seq.total)+'분</p></div>'+
+    '<div class="card"><div class="label">어디에서 하셨어요?</div><div class="opts" style="justify-content:flex-start">'+PLACES.map(function(x){return '<button class="chip" data-act="place" data-v="'+x+'" aria-pressed="'+(P.place===x)+'">'+x+'</button>'}).join('')+'</div>'+
+    '<div class="label">오늘 몸과 마음 한 줄</div><textarea id="pnote" rows="2" placeholder="예: 어깨가 가벼워졌다">'+esc(P.note)+'</textarea></div>'+
+    '<button class="btn" data-act="save" style="margin-top:auto">기록하고 마치기</button></div></div>';
+    return;
+  }
+  var step=P.seq.steps[P.i],p=POSES[step[0]],n=P.seq.steps.length;
+  var c=2*Math.PI*52;
+  var next=P.seq.steps[P.i+1];
+  host.innerHTML='<div class="player"><div class="inner">'+
+  '<div class="pbar"><span>'+(P.i+1)+' / '+n+'</span><span>'+(next?'다음: '+esc(POSES[next[0]].ko):'마지막 자세')+'</span><button class="chip" data-act="quit" style="min-height:40px;padding:4px 14px">종료</button></div>'+
+  '<div class="prog"><i style="width:'+(P.i/n*100)+'%"></i></div>'+
+  '<div class="pname"><h1>'+esc(p.ko)+'</h1><span class="sa">'+esc(p.sa)+'</span></div>'+
+  '<div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="bg" cx="60" cy="60" r="52"/><circle class="fg" id="pfg" cx="60" cy="60" r="52" style="stroke-dasharray:'+c+';stroke-dashoffset:'+(c*(1-P.left/step[1]))+'"/></svg><div class="t" id="ptime" role="timer">'+mmss(P.left)+'</div></div>'+
+  (p.flow?'<p class="move" id="pmove">'+(P.mv>=0?esc(p.flow[P.mv][0]):'')+'</p>':'')+
+  (store.detail?'<p class="cue">'+esc(p.cue)+'</p>':'<p class="cue" style="color:var(--muted)">호흡에 집중하세요</p>')+
+  (P.showAlt?'<div class="alt"><b>아프거나 힘들면</b><br>'+esc(p.alt)+(p.warn?'<br><span style="color:var(--warn)">'+esc(p.warn)+'</span>':'')+'</div>':'')+
+  '<div class="opts"><button class="chip" data-act="alt" aria-pressed="'+P.showAlt+'">아파요 · 대체 동작</button><button class="chip" data-act="pvoice" aria-pressed="'+store.voice+'">음성</button><button class="chip" data-act="pdetail" aria-pressed="'+store.detail+'">해설</button></div>'+
+  '<div class="ctl"><button class="btn ghost" data-act="prev" aria-label="이전">이전</button><button class="btn" data-act="pause">'+(P.paused?'계속':'일시정지')+'</button><button class="btn ghost" data-act="skip" aria-label="다음">다음</button></div>'+
+  '</div></div>';
+}
+
+/* ---------- 호흡 ---------- */
+var B={run:false,t:null,phase:0,round:0,pid:null};
+function bpaint(){var o=document.getElementById('orb');if(!o)return}
+function bstop(msg){clearTimeout(B.t);B.run=false;var o=document.getElementById('orb'),l=document.getElementById('olab'),b=document.getElementById('bbtn');
+  if(o){o.style.transitionDuration='1s';o.style.transform='scale(.6)'}if(l)l.textContent=msg||'준비';if(b)b.textContent='시작';try{speechSynthesis.cancel()}catch(e){}wakeOff()}
+function bstart(){
+  if(B.run){bstop();return}
+  var b=BREATHS.filter(function(x){return x.id===st.breath})[0];
+  B.run=true;B.round=0;B.phase=0;document.getElementById('bbtn').textContent='멈추기';wakeOn();bell(523);bphase(b);
+}
+function bphase(b){
+  if(!B.run)return;
+  var o=document.getElementById('orb'),l=document.getElementById('olab'),cn=document.getElementById('ocnt');
+  if(!o){B.run=false;return}
+  var names=['들이쉬세요','멈추세요','내쉬세요','쉬세요'],secs=b.pat[B.phase];
+  if(!secs){B.phase=(B.phase+1)%4;if(B.phase===0){B.round++}return bphase(b)}
+  if(B.round>=b.rounds){bell(392);bstop('마쳤어요');say('수고하셨습니다');return}
+  l.textContent=names[B.phase]+' '+secs;
+  o.style.transitionDuration=(B.phase===0||B.phase===2?secs:0.3)+'s';
+  if(B.phase===0)o.style.transform='scale(1)';else if(B.phase===2)o.style.transform='scale(.6)';
+  if(cn)cn.textContent=(B.round+1)+' / '+b.rounds+'회';
+  if(B.phase===0&&B.round%2===0&&B.round===0)say(names[0]);
+  B.t=setTimeout(function(){B.phase=(B.phase+1)%4;if(B.phase===0)B.round++;bphase(b)},secs*1000);
+}
+function med(m){
+  var o=document.getElementById('orb');B.run=false;clearTimeout(B.t);bell(523);wakeOn();
+  var end=Date.now()+m*60000,l=document.getElementById('olab');if(o){o.style.transitionDuration='4s';o.style.transform='scale(1)'}
+  B.run=true;document.getElementById('bbtn').textContent='멈추기';
+  (function loop(){if(!B.run)return;var r=(end-Date.now())/1000;if(r<=0){bell(392);bstop('마쳤어요');return}
+    var e=document.getElementById('olab');if(!e){B.run=false;return}e.textContent=mmss(r);B.t=setTimeout(loop,500)})();
+}
+
+/* ---------- 이벤트 ---------- */
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]');if(!el)return;
+  var a=el.getAttribute('data-act'),v=el.getAttribute('data-v');
+  if(a==='tab'){if(B.run)bstop();st.tab=v;render();window.scrollTo(0,0)}
+  else if(a==='mood'){st.mood=st.mood===+v?null:+v;render()}
+  else if(a==='play'||a==='solo'){startPlay(v)}
+  else if(a==='time'){st.time=+v||0;render()}
+  else if(a==='cat'){st.cat=v;render()}
+  else if(a==='seqopen'){st.seqOpen=st.seqOpen===v?null:v;render()}
+  else if(a==='open'){st.open=st.open===v?null:v;render()}
+  else if(a==='bsel'){if(B.run)bstop();st.breath=v;render()}
+  else if(a==='bstart'){bstart()}
+  else if(a==='med'){med(+v)}
+  else if(a==='cal'){st.calOff+=+v;render()}
+  else if(a==='tg'){store[v]=!store[v];save();render()}
+  else if(P){
+    if(a==='pause'){if(P.paused){P.end=Date.now()+P.left*1000;P.paused=false}else{P.paused=true}paint()}
+    else if(a==='skip'){if(P.i+1>=P.seq.steps.length)finish();else enter(P.i+1)}
+    else if(a==='prev'){enter(Math.max(0,P.i-1))}
+    else if(a==='alt'){P.showAlt=!P.showAlt;paint()}
+    else if(a==='pvoice'){store.voice=!store.voice;save();if(!store.voice){try{speechSynthesis.cancel()}catch(x){}}paint()}
+    else if(a==='pdetail'){store.detail=!store.detail;save();paint()}
+    else if(a==='quit'){closePlayer()}
+    else if(a==='place'){var ta=document.getElementById('pnote');if(ta)P.note=ta.value;P.place=P.place===v?'':v;paint()}
+    else if(a==='save'){
+      var ta2=document.getElementById('pnote');var k=key(),prev=store.log[k]||{sec:0};
+      store.log[k]={name:P.seq.name,sec:(prev.sec||0)+P.seq.total,place:P.place||prev.place||'',note:(ta2&&ta2.value.trim())||prev.note||''};
+      save();st.tab='log';closePlayer();
+    }
+  }
+});
+document.addEventListener('input',function(e){if(e.target.id==='q'){st.q=e.target.value;var pos=e.target.selectionStart;render();var q=document.getElementById('q');if(q){q.focus();try{q.setSelectionRange(pos,pos)}catch(x){}}}});
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&P&&!P.done)wakeOn()});
+
+render();
+</script>
+
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
+</body>
+</html>
